@@ -1,0 +1,13 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cinder-rail",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-09-04",
+  "workers_dev": true,
+  "assets": {"directory": "./public", "binding": "ASSETS", "run_worker_first": true, "html_handling": "none"},
+  "durable_objects": {"bindings": [{"name":"SESSIONS","class_name":"ComputeSession"},{"name":"CONTROL","class_name":"ControlPlane"}]},
+  "migrations": [{"tag":"v1","new_sqlite_classes":["ComputeSession","ControlPlane"]}],
+  "ai": {"binding":"AI"},
+  "vars": {"INFERENCE_ENABLED":"true","MAX_INFERENCES_PER_DAY":"200","MAX_SESSIONS_PER_DAY":"500","MAX_CALLS_PER_DAY":"5000"},
+  "observability": {"enabled": false}
+}

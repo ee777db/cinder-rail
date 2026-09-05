@@ -1,0 +1,196 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Cinder Rail sandbox API",
+    "version": "0.1.0",
+    "description": "Custom HTTP 402 sandbox. No real payments. Not x402 wire-compatible. ECDSA P-256 signatures use SHA-256, raw r||s, base64url without padding, recursively sorted JSON object keys. Session IDs are public receipt identifiers. A separate private sessionToken returned on creation must be sent as X-Cinder-Session for quote creation and ledger reads. Never export this token."
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Service status",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/catalog": {
+      "get": {
+        "summary": "Services and test prices",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/key": {
+      "get": {
+        "summary": "Issuer public JWK; pin independently",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          }
+        }
+      }
+    },
+    "/api/sessions": {
+      "post": {
+        "summary": "Create a 24-hour sandbox session",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          },
+          "201": {
+            "description": "Created: sessionId, balanceMicros, expiresAt, unit"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "publicKey": {
+                    "type": "object",
+                    "description": "Public P-256 JWK without d"
+                  }
+                },
+                "required": [
+                  "publicKey"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/sessions/{sessionId}": {
+      "get": {
+        "summary": "Read ledger and up to 50 receipts",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          }
+        },
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sessionId",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        ]
+      }
+    },
+    "/api/execute": {
+      "post": {
+        "summary": "Quote or execute a signed request",
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "429": {
+            "description": "Sandbox daily quota exceeded"
+          },
+          "402": {
+            "description": "Unsigned call: quote and exact signingPayload. Insufficient balance: error without quote."
+          },
+          "401": {
+            "description": "Signature invalid"
+          },
+          "409": {
+            "description": "Stale, failed or in-progress quote"
+          },
+          "410": {
+            "description": "Quote expired"
+          },
+          "503": {
+            "description": "Compute failed; reservation refunded"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sessionId": {
+                    "type": "string"
+                  },
+                  "service": {
+                    "type": "string",
+                    "enum": [
+                      "hash",
+                      "inference"
+                    ]
+                  },
+                  "input": {
+                    "type": "string",
+                    "maxLength": 4000
+                  },
+                  "quoteId": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string",
+                    "description": "Base64url raw ECDSA P256 signature over the exact signingPayload from the stored quote"
+                  }
+                },
+                "required": [
+                  "sessionId",
+                  "input"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

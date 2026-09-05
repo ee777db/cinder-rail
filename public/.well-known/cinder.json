@@ -1,0 +1,12 @@
+{
+  "name": "Cinder Rail",
+  "version": "0.1.0",
+  "protocol": "cinder-sandbox-v1",
+  "mode": "sandbox",
+  "catalog": "/api/catalog",
+  "issuerKey": "/api/key",
+  "openapi": "/openapi.json",
+  "documentation": "/developers",
+  "realPayments": false,
+  "x402Compatible": false
+}

@@ -1,0 +1,34 @@
+#!/usr/bin/env node
+import {createHash,webcrypto} from 'node:crypto';
+import {writeFile} from 'node:fs/promises';
+const {subtle}=webcrypto;
+const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+const hash=s=>createHash('sha256').update(s).digest('hex');
+const arg=name=>process.argv[process.argv.indexOf(name)+1];
+const base=(process.env.CINDER_URL||'http://127.0.0.1:8787').replace(/\/$/,'');
+const service=process.argv.includes('--service')?arg('--service'):'hash';
+const input=process.argv.includes('--input')?arg('--input'):'Machines need budgets, and work needs receipts.';
+const budget=process.argv.includes('--budget')?Number(arg('--budget')):500;
+if(!Number.isSafeInteger(budget)||budget<0)throw new Error('Budget must be a nonnegative integer in sandbox-microUSD.');
+let sessionToken;
+async function post(path,body){const response=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json',...(sessionToken?{'x-cinder-session':sessionToken}:{})},body:JSON.stringify(body)});return {status:response.status,body:await response.json()};}
+const issuer=await (await fetch(base+'/api/key')).json();
+const keys=await subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);
+const sessionResponse=await post('/api/sessions',{publicKey:await subtle.exportKey('jwk',keys.publicKey)});
+if(sessionResponse.status!==201)throw new Error(sessionResponse.body.message||'Session creation failed');
+const session=sessionResponse.body;sessionToken=session.sessionToken;
+const quoted=await post('/api/execute',{sessionId:session.sessionId,service,input});
+if(quoted.status!==402||!quoted.body.quote)throw new Error(quoted.body.message||'Expected quote');
+const {quote,signingPayload}=quoted.body;
+if(signingPayload!==canonical(quote)||quote.sessionId!==session.sessionId||quote.service!==service||quote.inputHash!==hash(input)||!Number.isSafeInteger(quote.amountMicros)||quote.amountMicros<0||quote.amountMicros>budget||quote.cumulativeMicros!==quote.amountMicros||Date.parse(quote.expiresAt)<=Date.now())throw new Error('Quote failed scope, expiry or spending checks');
+const signature=Buffer.from(await subtle.sign({name:'ECDSA',hash:'SHA-256'},keys.privateKey,new TextEncoder().encode(signingPayload))).toString('base64url');
+const executed=await post('/api/execute',{sessionId:session.sessionId,quoteId:quote.id,input,signature});
+if(executed.status!==200)throw new Error(executed.body.message||'Execution failed');
+const result=executed.body;const receipt=result.receipt;
+const publicKey=await subtle.importKey('jwk',issuer.publicKey,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);
+const signatureValid=await subtle.verify({name:'ECDSA',hash:'SHA-256'},publicKey,Buffer.from(result.signature,'base64url'),new TextEncoder().encode(result.signingPayload));
+if(!signatureValid||result.signingPayload!==canonical(receipt)||receipt.keyId!==issuer.keyId||receipt.quoteId!==quote.id||receipt.sessionId!==session.sessionId||receipt.service!==service||receipt.amountMicros!==quote.amountMicros||receipt.cumulativeMicros!==quote.cumulativeMicros||receipt.inputHash!==hash(input)||receipt.outputHash!==hash(result.output)||receipt.mode!=='sandbox'||receipt.verification!=='signed-receipt')throw new Error('Receipt verification failed');
+if(service==='hash'&&result.output!==hash(input))throw new Error('Deterministic compute mismatch');
+const exported={issuer,quote,...result,verified:true};
+if(process.argv.includes('--out'))await writeFile(arg('--out'),JSON.stringify(exported,null,2)+'\n');
+console.log(JSON.stringify({output:result.output,verified:true,verification:service==='hash'?'signed-receipt + independently recomputed digest':'signed-receipt (not inference correctness)',chargedTestMicros:receipt.amountMicros,balanceTestMicros:result.balanceMicros,receiptId:receipt.id},null,2));

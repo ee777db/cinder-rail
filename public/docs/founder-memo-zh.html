@@ -1,0 +1,13 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cinder Rail：为什么我这样做 — Cinder Rail</title><meta name="description" content="Cinder Rail: budgeted machine compute, signed receipts, explicit trust boundaries."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a></nav></header><main><h1>Cinder Rail：为什么我这样做</h1>
+<p>2026 年 9 月 5 日</p>
+<p>我的判断是：这个时代真正稀缺的，不是再造一个符号，而是让机器之间的交易具备清楚的授权、可预期的成本和可检查的证据。我们把这个东西叫 <strong>Cinder Rail</strong>。</p>
+<p>“火”可以给项目一个精神方向：能量在交换中变成有用的工作。但文化意象不能替代经济模型。算力不会因为一个代币会销毁就更便宜；代币供给变少，也不等于服务需求增长。让长期不动的钱衰减，会给用户增加持有成本；奖励流转，又容易奖励自买自卖。首版没有引入这些机制。</p>
+<p>我选择先把一笔机器购买做实：服务给出有限时效和确定额度的报价，Agent 用自己的会话密钥签名，系统检查预算并执行，再把输入摘要、输出摘要与费用一起写进签名收据。用户能检查这笔授权，也能检查收据有没有被改动。SHA-256 的结果还能自己重新计算。</p>
+<p>这里必须讲清一个关键区别：<strong>有签名的收据，不等于已经证明某个大模型按照某套权重完成了推理。</strong> 当前 Llama 路径依赖服务提供方的执行声明。TEE、零知识证明和乐观争议机制都有用途，也都有自己实际的硬件、计算、隐私和信任成本。我们给未来的证据接口留位置，首版只写已经提供的保证。</p>
+<p>技术栈因此自然落在 Cloudflare Workers、Durable Objects 和 Meta Llama：少量组件就能把请求入口、持久化额度、签名收据和真实推理连接起来。它是一个中心化运营的公开沙盒，使用没有货币价值的测试额度。它没有假装自己已经是新的公链，也没有接收客户存款。产品运行不依赖 ChatGPT、GPT 模型或 GPT Sites。</p>
+<p>真实资金的下一条路线是已有的 USDC 和成熟链上环境，先走 Base 上符合规范的 x402，再根据实际高频交易量决定是否启用累积支付通道。小额请求不需要每笔都变成一笔链上转账。通道把结算成本分摊到多次工作上，但仍然要承担抵押资金、故障恢复、提款和争议处理的成本。稳定币也不是绝对稳定、绝对可兑付或没有发行方风险。</p>
+<p>这也改变了我们要卖的东西。我们卖的是开发者更容易接入的一笔购买，以及更容易对账的一份证据。第一批用户应该是有真实 API 或计算服务的开发者。衡量进展的指标是能否完成一次有用购买、能否复购、成本是否低于收入、失败有没有被正确处理，而不是币价、虚构交易额或热闹的群人数。</p>
+<p>我会把可运行产品、源码、协议、参考合约和发布材料放在一起。部署成功只能证明产品在那个地址运行；完成测试只能证明覆盖到的行为符合预期。任何公开说明都应该准确区分已上线、参考实现和需要进一步验证的能力。尤其是客户资金和推理证明，不能用“100%”三个字跳过证据。</p>
+<p>你最有价值的参与，不是替项目按每一个按钮，而是把它带到一个真正需要它的人面前：一个愿意让自己的 Agent 购买真实 API 的团队，或一个愿意用自己的服务接入试点的提供方。涉及真实资金时，业务主体、资金责任和明确的预算也需要能承担这些责任的人来决定。其余工程和可执行的发布工作，应由项目运营者承担。</p>
+<p>如果将来真的出现只有一个新代币才能解决的协议问题，我们再讨论它。今天的答案已经可以更具体：先让机器花出去的每一小笔额度，都有清楚的来龙去脉。</p>
+</main><footer>Experimental sandbox · Test credits have no monetary value · <a href="/privacy">Privacy</a></footer></body></html>

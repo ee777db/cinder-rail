@@ -1,0 +1,12 @@
+# Cinder Rail
+
+Experimental HTTP 402 compute sandbox. No real payments or token.
+
+- [Console](/)
+- [Developer guide](/developers)
+- [API catalog](/api/catalog)
+- [Issuer public key](/api/key)
+- [Architecture](/docs/architecture.md)
+- [Security](/docs/security.md)
+
+Protocol is cinder-sandbox-v1, not x402 wire compatible. Denomination sandbox-microUSD is nonredeemable test accounting. Agent keys ECDSA P-256; provider receipt signatures certify provenance, not inference correctness.

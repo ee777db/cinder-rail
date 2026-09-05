@@ -1,0 +1,62 @@
+# What Cinder Rail verifies
+
+Version 0.1 · 5 September 2026
+
+A receipt is evidence of a statement. Its signature can show that the holder of a particular key signed that statement and that its bytes have not changed. It does not make every assertion inside the statement true.
+
+## Evidence classes
+
+| Evidence class | What a client can establish | Additional assumptions | Release status |
+| --- | --- | --- | --- |
+| Issuer-signed receipt | Registered issuer key signed the exact receipt; receipt binds amount and input/output digests | Trust in issuer key provenance and operator | Implemented |
+| Client-recomputed deterministic result | Given the retained input and agreed function, the output matches independent computation | Correct local implementation; exact byte encoding | SHA-256 example implemented |
+| TEE-attested execution | Valid hardware/software measurements and a key bound to an accepted workload policy | Hardware vendor, attestation chain, software measurements, patch/revocation state | Design only |
+| Optimistically verified execution | A claim survived an enforceable challenge system with an available honest challenger | Available deterministic trace, incentives, challenge window, enforcement | Design only |
+| ZK-verified execution | A proof verifies an exact committed relation under the proof system's assumptions | Correct circuit, model commitments, implementation, setup where applicable | Design only |
+
+These labels are not a universal ordering. A deterministic recomputation may answer a narrow question more directly than a TEE quote; a valid ZK proof of a poorly specified relation may answer the wrong question entirely.
+
+## Current receipt semantics
+
+The sandbox receipt binds the session, quote, service identifier, declared model, input digest, output digest, charge, cumulative spend, issuance time, key identifier, reported duration and usage fields. Its verification label is `signed-receipt`. The `model` field on an inference receipt is the operator's assertion, not a proof that those weights executed.
+
+Clients should retain the original input, output, receipt, signature and issuer public key. Recompute the receipt's canonical bytes, verify its P-256/SHA-256 signature, and compare the output's UTF-8 SHA-256 digest. Also compare the charge, service and quote identity with the authorization. Checking only the signature misses a correctly signed receipt for the wrong purchase.
+
+For the digest service, recomputing SHA-256 on the original input demonstrates that the returned output equals that deterministic function. It does not reveal which physical machine computed it first or prove a specific amount of electricity was consumed. For Llama, independently hashing the answer checks content integrity only.
+
+A key downloaded from the same server as a receipt inherits trust in that server. Pin the issuer key after a trusted initial acquisition and retain old keys for historic receipts. A hostile operator that controls both the site and key endpoint can otherwise replace the key and forge a new history. An external transparency log could reduce equivocation; this release has no such log or independently trusted timestamp authority.
+
+## Practical proof strategy
+
+### TEEs for an explicitly attested service
+
+Confidential computing is a plausible early premium service because it can protect and attest conventional workloads without translating a full transformer into a proof circuit. NVIDIA's reference architecture includes CPU and GPU attestation, workload policy and conditional release of encrypted models. Device attestation alone is insufficient: the application measurement and receipt key must be connected to the accepted model and request. [NVIDIA confidential-computing scope](https://docs.nvidia.com/enterprise-reference-architectures/deploying-proprietary-models-confidential-compute-self-hosted-vms/latest/scope.html).
+
+A proposed Cinder TEE receipt would bind a fresh challenge, model digest, container or binary measurement, tokenizer digest, numerical settings, request and response digests, and an ephemeral signing key created inside the attested environment. The verifier must evaluate attestation freshness, vendor certificate chain, revocations and approved software measurements before trusting that key. Rejected or missing evidence must lower the evidence class or reject the service according to the buyer's policy; never silently label a normal signature as attested.
+
+Host integrity does not prove answer truth, safe reasoning, lawful data rights, good model quality or that a human authorized the agent. Side channels, malicious approved code and compromised vendor roots remain threat-model considerations. The current Cloudflare inference call does not return this evidence to Cinder and is not advertised as TEE verified.
+
+### ZKML for a narrow, exact relation first
+
+A useful proof statement is: **these committed model parameters, tokenizer and execution semantics, applied to this committed input and randomness, produce this committed output.** Model weights and configuration must be bound, not merely an architecture name. Fixed-point conversion, quantization, nonlinear approximations and sampling all affect the relation being proved.
+
+Research demonstrates progress, but a paper's benchmark is not a production SLA. The 2024 zkLLM paper reported under 15 minutes to prove its evaluated 13-billion-parameter inference workload, with proofs below 200 kB. That result illustrates a substantial proving cost relative to an interactive API; it is not a claim about every current proof system or every generation length. [zkLLM paper](https://arxiv.org/abs/2404.16109).
+
+Cinder's proposed first ZK service should be a small fixed model or deterministic function with published test vectors, committed weights, exact numeric semantics and independent circuit review. Measure end-to-end proving latency, hardware, peak memory, proof size and verification cost. Keep inference response time and later proof-delivery time separate if proofs arrive asynchronously. Do not promise full private frontier-model inference at sub-millisecond proving cost.
+
+### Optimistic verification for replayable work
+
+An optimistic scheme accepts a claim provisionally and permits a challenger to identify a fault through an enforceable interactive procedure. opML is one research example of this approach for machine learning. [opML paper](https://arxiv.org/abs/2401.17555).
+
+Cinder would need publicly available or appropriately shared inputs, committed model bytes, deterministic execution and an economic reason for an independent watcher to challenge. Ordinary floating-point GPU execution and stochastic sampling require a carefully specified reproducibility model; simply running the same prompt twice is not a fraud proof. A private prompt also cannot be handed to arbitrary challengers without changing the privacy promise. Challenge windows delay final acceptance and require capital. This makes optimistic verification a candidate for suitable jobs, not a free verification layer for every chat response.
+
+## Agent identity and authority
+
+The live agent identity is a session public key. Possession of its private key allows a caller to authorize that session's test credits. It does not assert that a unique person exists behind the key, that the caller is autonomous, or that a real person reviewed a particular prompt.
+
+W3C DIDs provide an identifier and document model for verification methods, controllers and services. They can describe humans, organizations or software; they do not provide personhood or truthful credentials automatically. A future identity adapter should choose an actual DID method with defined resolution and rotation, not create an unregistered `did:cinder` prefix and claim interoperability. [W3C DID Core](https://www.w3.org/TR/did/).
+
+ERC-6551 defines accounts controlled through NFTs. It can be relevant when an agent's ownership must follow an NFT, but requiring every API customer to mint an NFT adds a dependency unrelated to the basic authorization problem. [ERC-6551](https://eips.ethereum.org/EIPS/eip-6551).
+
+A funded deployment should use a long-lived owner key to authorize narrowly scoped, revocable session keys: allowed provider, asset, chain, method, spending ceiling and expiry. A compromised session key must not drain unrelated owner assets. EVM settlement normally uses a separately supported wallet-signature path; the sandbox browser's P-256 key is not assumed to be an EVM account. Human approval, organizational identity and compute correctness should remain separate attestations.
+

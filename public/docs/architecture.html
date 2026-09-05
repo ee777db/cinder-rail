@@ -1,0 +1,132 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cinder Rail: architecture and decisions — Cinder Rail</title><meta name="description" content="Cinder Rail: budgeted machine compute, signed receipts, explicit trust boundaries."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a></nav></header><main><h1>Cinder Rail: architecture and decisions</h1>
+<p>Version 0.1 · 5 September 2026 · Public sandbox and reference design</p>
+<p>Cinder Rail makes one machine purchase inspectable: a service quotes a bounded price, an agent signs the authorization, the service performs work, and the operator signs a receipt binding the charge to input and output digests. The initial deployment uses nonredeemable test credits. It does not move USDC, issue a token, operate a blockchain, or prove Llama inference mathematically.</p>
+<p>The product thesis is that buyers need a clear answer to <strong>what did this agent authorize, what did it receive, and what evidence supports the charge?</strong> A new speculative asset does not answer those questions. A useful rail can begin with signed authorizations, strict spending limits, transparent evidence, and an interoperable settlement adapter.</p>
+<h2>What runs now</h2>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Implementation</th>
+<th>Trust boundary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Browser client</td>
+<td>Static HTML, CSS, JavaScript; native WebCrypto P-256 agent keys</td>
+<td>Website code and the user&#39;s browser</td>
+</tr>
+<tr>
+<td>Public gateway</td>
+<td>Cloudflare Worker; same-origin API and static assets</td>
+<td>Cloudflare and deployment operator</td>
+</tr>
+<tr>
+<td>Session accounting</td>
+<td>One Durable Object per session; persistent ledger, quotes, receipts</td>
+<td>Centralized operator-managed database</td>
+</tr>
+<tr>
+<td>Signing and limits</td>
+<td>Separate provider control object; P-256 issuer key and daily quotas</td>
+<td>Operator controls the signing key</td>
+</tr>
+<tr>
+<td>Deterministic service</td>
+<td>SHA-256 over UTF-8 text</td>
+<td>Client can recompute the digest</td>
+</tr>
+<tr>
+<td>Inference service</td>
+<td>Meta Llama 3.1 8B Instruct FP8 Fast through Workers AI</td>
+<td>Provider assertion of which model ran</td>
+</tr>
+<tr>
+<td>Settlement</td>
+<td>Integer test ledger, <code>sandbox-microUSD</code></td>
+<td>No monetary value or redemption</td>
+</tr>
+</tbody></table>
+<p>Cloudflare&#39;s per-object durable, transactional storage is a practical coordination primitive for an isolated agent session. External asynchronous calls can still interleave; persistence and explicit state transitions remain necessary. Cloudflare&#39;s storage guarantees are infrastructure guarantees, not decentralized consensus. <a href="https://developers.cloudflare.com/durable-objects/concepts/what-are-durable-objects/">Durable Objects concepts</a>, <a href="https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/">concurrency guidance</a>.</p>
+<p>The runtime uses no ChatGPT, GPT model, or GPT Sites service. The inference dependency is Meta Llama served by Cloudflare. Source code, assets, and deployment configuration are ordinary files that can be moved to another host. Replacing Durable Objects requires a transactional store with equivalent application invariants; portability does not mean identical deployment commands.</p>
+<pre><code class="language-mermaid">sequenceDiagram
+    participant A as Agent client
+    participant W as Worker / session ledger
+    participant C as Compute provider
+    participant S as Receipt signer
+    A-&gt;&gt;W: Register public session key
+    W--&gt;&gt;A: Test balance and expiry
+    A-&gt;&gt;W: Service request
+    W--&gt;&gt;A: HTTP 402 + bounded quote
+    A-&gt;&gt;A: Check price, input digest, expiry; sign quote
+    A-&gt;&gt;W: Same input + signed quote
+    W-&gt;&gt;W: Verify; reserve test credits
+    W-&gt;&gt;C: Execute bounded work
+    C--&gt;&gt;W: Output
+    W-&gt;&gt;S: Bind output digest and charge in receipt
+    S--&gt;&gt;W: Issuer signature
+    W-&gt;&gt;W: Persist result and final charge
+    W--&gt;&gt;A: Output + signed receipt
+    A-&gt;&gt;A: Verify signature and output digest
+</code></pre>
+<p>The sandbox protocol is named <code>cinder-sandbox-v1</code>. HTTP 402 is an HTTP status used in this custom flow. It is <strong>not an assertion of x402 compatibility</strong>. Browser P-256 authorizations cannot be submitted as ordinary EVM wallet payments.</p>
+<p>Session creation returns a public session identifier and a separate secret session token. The token is sent in <code>X-Cinder-Session</code> to read session state or obtain an unsigned quote; the identifier alone is safe to include in a receipt. Spending additionally requires the agent&#39;s valid signature. Receipt exports must omit the secret token and private key.</p>
+<h2>Settlement choice for a funded release</h2>
+<p>Choose an existing Ethereum L2, initially Base, with native USDC. Start with canonical x402 v2 for sufficiently priced individual purchases. Add a separately specified, audited cumulative channel adapter when measured repeat traffic justifies it. Keep proof verification independent of chain choice.</p>
+<table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Benefits</th>
+<th>Costs and assumptions</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Existing EVM L2 / Base</td>
+<td>Established EVM tools, USDC and x402 integration; reusable wallet and contract ecosystem</td>
+<td>Sequencer availability; chain fees; issuer risk; wallet/facilitator integration</td>
+<td>First funded target after gates pass</td>
+</tr>
+<tr>
+<td>Own Arbitrum Orbit or OP Stack L2/L3, optional Celestia DA</td>
+<td>Control execution settings, fee policy, ordering and capacity</td>
+<td>Operate sequencer, batcher, monitoring, bridges, upgrades, proof infrastructure and DA integration; fragment liquidity</td>
+<td>Unjustified for this launch</td>
+</tr>
+<tr>
+<td>Existing Solana / SVM</td>
+<td>Parallel execution, existing stablecoin ecosystem, x402 support</td>
+<td>Separate wallet and program implementation; contention, fees and commitment policy still matter</td>
+<td>Good second adapter if users need it</td>
+</tr>
+<tr>
+<td>Own SVM chain</td>
+<td>Execution customization</td>
+<td>A runtime is not a validator set, bridge, DA guarantee or reliable operating team</td>
+<td>No present need</td>
+</tr>
+<tr>
+<td>EigenLayer AVS</td>
+<td>Can organize economically accountable verification operators</td>
+<td>Must define objective faults, slashing, capital exposure, operator independence and monitoring; does not supply inference correctness by itself</td>
+<td>Revisit only for a concrete verifier service</td>
+</tr>
+</tbody></table>
+<p>These decisions are engineering judgments about this project&#39;s size and needs, not universal rankings of the networks. OP Stack transaction fees include execution and L1 data components; its chain heads express different finality states. <a href="https://docs.optimism.io/op-stack/protocol/differences">OP Stack differences</a>. Arbitrum&#39;s AnyTrust design trades some DA assumptions for cost; deploying a chain still requires making those assumptions explicit. <a href="https://docs.arbitrum.io/nitro-whitepaper.pdf">Arbitrum Nitro whitepaper</a>.</p>
+<p>Celestia supplies data availability and blob ordering; execution and settlement remain separate responsibilities. Adding its name to an architecture does not provide a bridge or a valid compute verifier. <a href="https://docs.celestia.org/learn/celestia-101/data-availability/">Celestia data availability</a>. EigenLayer restaking can support a service&#39;s defined economic penalties; the service must still specify which behavior is attributable and punishable. <a href="https://docs.eigencloud.xyz/assets/files/EigenLayer_WhitePaper-88c47923ca0319870c611decd6e562ad.pdf">EigenLayer whitepaper</a>.</p>
+<h2>Acknowledgment is not finality</h2>
+<p>The UI&#39;s request duration measures the application path. It is not blockchain finality, a guaranteed latency percentile, or an independently measured benchmark.</p>
+<p>Base documentation currently distinguishes approximately 200 ms Flashblock preconfirmation, 2 s L2 block inclusion, 2 minutes L1 batch inclusion and 20 minutes L1 batch finality. These are different assurances, not an unconditional 200 ms settlement promise. The approximately seven-day withdrawal process concerns movement back to Ethereum L1. <a href="https://docs.base.org/specifications/transactions/transaction-finality">Base transaction finality</a>.</p>
+<p>Solana similarly distinguishes <code>processed</code>, <code>confirmed</code> and <code>finalized</code>; a recent processed block can roll back, while finalized is the strongest network commitment. Never present a lower commitment level as an irreversible settlement. <a href="https://solana.com/docs/rpc#configuring-state-commitment">Solana RPC commitment</a>.</p>
+<p>For a future channel, a successful signature check is an <strong>off-chain acceptance of a claim</strong> against previously funded collateral. The recipient accepts chain, timeout, enforcement and signer risks until the claim is settled. The principal benefit is fewer on-chain actions, not removal of every trust assumption or cost.</p>
+<h2>Funded channel design</h2>
+<p>This section specifies an intended production design. Consult the contracts&#39; own documentation for the narrower capabilities of the unaudited reference implementation.</p>
+<p>An agent funds a unidirectional escrow for one asset, chain, provider and authorized signer. A voucher contains channel ID, cumulative amount, sequence or unique authorization ID, expiry and domain separation. The provider accepts a voucher only if it increases the authorized total, does not exceed funded collateral, and leaves sufficient time to claim it. A channel is not a transferable credit and cannot be spent at unrelated providers.</p>
+<p>If the highest valid total is <code>A</code> and the contract already paid <code>P</code>, a claim transfers <code>A − P</code>, subject to <code>0 ≤ P ≤ A ≤ D</code>, where <code>D</code> is the channel&#39;s funded amount. Resubmitting the same voucher cannot pay again. Domain separation binds the signature to the chain and contract. Nonces, state and deadlines prevent replay; typed-data signing alone does not. <a href="https://eips.ethereum.org/EIPS/eip-712#security-considerations">EIP-712 security considerations</a>.</p>
+<p>The refund path requires a challenge period or a claim deadline that providers can enforce while the payer exits. A watchtower can improve availability but introduces monitoring and incentive questions. Economic exposure must be capped during outages. A provider must not deliver unlimited work against a merely broadcast deposit.</p>
+<p>Settlement and delivery are not automatically atomic. With preauthorization, an authorized provider may be paid before the buyer is satisfied. With postdelivery signatures, a buyer may refuse to sign. Small exposure windows, service-level refunds and objective proof conditions can limit this problem; a signed receipt alone cannot solve fair exchange or a subjective answer-quality dispute.</p>
+<h2>Interoperability and scope</h2>
+<p>Canonical x402 v2 standardizes versioned payment requirements, chain identifiers and payment payloads. Use its actual schema and SDK fixtures; do not relabel Cinder&#39;s custom JSON as an accepted scheme. The future adapter must pin a specification version and pass both successful-payment and failure-path integration tests. <a href="https://github.com/x402-foundation/x402/blob/main/specs/x402-specification-v2.md">x402 v2 specification</a>.</p>
+<p>Cinder&#39;s own small protocol has a deliberately narrower surface: one session, bounded input, a fixed quote, one active operation and an issuer receipt. It does not offer decentralized provider discovery, general agent autonomy, cross-chain settlement, live deposits or production compute proofs. Those features require their own evidence, not a larger landing page.</p>
+</main><footer>Experimental sandbox · Test credits have no monetary value · <a href="/privacy">Privacy</a></footer></body></html>

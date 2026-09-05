@@ -1,0 +1,66 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Security — Cinder Rail</title><meta name="description" content="Cinder Rail: budgeted machine compute, signed receipts, explicit trust boundaries."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a></nav></header><main><h1>Security model and operational boundaries</h1>
+<p>Version 0.1 · 5 September 2026</p>
+<p>Cinder Rail 0.1 is a public sandbox. Its nonredeemable credits isolate the demo from customer funds while exposing the actual authorization and receipt mechanics. The code and contracts have not received an independent security audit. Reference contracts are not an invitation to deposit assets.</p>
+<h2>Assets, actors and trust</h2>
+<p>The sandbox protects the integrity of per-session authorizations, spending totals and receipts, plus the operator&#39;s finite compute allowance. Its adversaries include callers with malformed requests, stolen session capabilities, replayed signatures, competing concurrent requests, and clients attempting to exhaust free resources.</p>
+<p>The operator controls deployment, accounting and the issuer private key. Cloudflare operates the hosting, durable storage and inference infrastructure. A valid operator signature does not protect a client against an operator willing to lie about execution. A browser compromise can use any key accessible to the page; an export restriction does not stop malicious code from invoking the key.</p>
+<h2>Implemented application controls</h2>
+<p>The service validates supported P-256 public keys and rejects submitted private-key material. A quote binds a random identifier and nonce, session, service, input hash, fixed charge, cumulative spend and expiry. A caller must sign the server&#39;s canonical quote. Input substitution, signature mismatch, expired authorizations and stale cumulative totals are rejected.</p>
+<p>The session ledger reserves credits before compute and records a completed result before successful delivery. Repeating a successfully completed signed request returns the existing result rather than charging again. Detected compute failures restore the reservation. One active operation per session bounds concurrency and simplifies accounting. A reservation that remains pending for two minutes is recovered through an alarm or subsequent request: its test charge is refunded and its quote cannot run again. An upstream service might still have executed; this is not exactly-once execution across an arbitrary provider.</p>
+<p>The gateway bounds JSON request bodies, input sizes and output length, checks browser origins on writes, and sends restrictive security headers. It does not fetch arbitrary user-supplied URLs. Operator-configured daily session, request, compute and inference limits bound intended sandbox activity. Per-IP request controls also apply to session reads and limit one caller&#39;s ability to exhaust the shared allowance. IP-based controls are an abuse signal, not personhood. Limits may reject legitimate users sharing a network or during a traffic spike.</p>
+<p>The deployed values in the configuration are the authority for quotas. Quotas limit application calls, not every possible hosting bill; malicious traffic, platform charges and upstream behavior still need observation. Never describe a request quota as a provider-enforced dollar spending cap.</p>
+<h2>Data handling</h2>
+<p>Prompts are sent to the configured compute provider for inference. The application retains quote metadata and input digests, and stores outputs with receipts so a retry can return the original result. Hashing is not encryption: a short or predictable input can sometimes be guessed from its digest.</p>
+<p>The public session identifier and the secret session capability are separate. Reading session state or requesting an unsigned quote requires the <code>X-Cinder-Session</code> header containing the session token. A receipt can include its session identifier without revealing that token. The token remains sensitive: it can reveal retained session results and permits quote requests, although it cannot sign spending authorizations. Do not export or publish it. Receipt and output contents themselves may still be sensitive, so the demo should be used with nonsensitive sample text.</p>
+<p>The session lifetime is 24 hours, with scheduled deletion of session storage. Deletion is an application-level retention policy, not a guarantee about every infrastructure backup or upstream provider log. The rate-limiting control stores a daily salted hash derived from a connection IP, not a global permanent identity. Hosting providers still handle normal connection information.</p>
+<p>The issuer private key is stored in the provider control object&#39;s storage in this version. Cloudflare access and deployment permissions are therefore part of the key-security boundary. A funded release needs a documented rotation and compromise process, retained historic public keys, restricted signing authority, and an assessed key-management solution. No independent time-stamping or public append-only receipt log exists here.</p>
+<h2>Important failure semantics</h2>
+<table>
+<thead>
+<tr>
+<th>Failure</th>
+<th>Required interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Browser loses the response after success</td>
+<td>Retry the same signed quote to retrieve its result while the session remains available</td>
+</tr>
+<tr>
+<td>Compute reports an error</td>
+<td>No successful receipt; reservation is refunded by the handled failure path</td>
+</tr>
+<tr>
+<td>Worker terminates during upstream compute</td>
+<td>Execution may have occurred without a delivered result; observe recovery state, never claim universal exactly-once service</td>
+</tr>
+<tr>
+<td>Public issuer key changes</td>
+<td>Verify against a previously trusted key; investigate rotation rather than automatically trusting a new history</td>
+</tr>
+<tr>
+<td>Provider reports a model name</td>
+<td>Treat it as a provider assertion unless independently accepted execution evidence accompanies it</td>
+</tr>
+<tr>
+<td>Session expires</td>
+<td>Test credits and stored results are ephemeral; retain exported evidence when needed</td>
+</tr>
+<tr>
+<td>Receipt signature verifies</td>
+<td>Content is attributable to the pinned signing key; model correctness and answer quality remain separate</td>
+</tr>
+</tbody></table>
+<h2>Requirements before customer funds</h2>
+<ol>
+<li>Independently review contract authorization, cumulative settlement, refund races, timeout behavior and token-transfer handling. Resolve critical and high-severity findings.</li>
+<li>Demonstrate conservation of funds, no duplicate claims, domain-bound signatures and safe exits through stateful property tests and adversarial integration tests.</li>
+<li>Prove funded-deposit detection, chain reorganization handling, finality policy, RPC failure behavior and facilitator settlement reconciliation on testnet.</li>
+<li>Separate provider accounting from the on-chain money path; define liability for paid-but-undelivered work and a bounded refund process.</li>
+<li>Set capped pilot exposure, signer revocation, operational alerts, recovery procedures and an accountable on-call owner.</li>
+<li>Define supported jurisdictions, service terms, privacy handling and the legal responsibilities of the chosen business and settlement arrangement with appropriate specialists.</li>
+</ol>
+<p>These are release requirements, not claims that a token or payment service becomes lawful or secure by passing a generic checklist. The precise operating model determines the analysis. A centralized ledger with a USDC label is not an audited escrow.</p>
+<h2>Reporting</h2>
+<p>Use the source repository&#39;s private vulnerability reporting channel if enabled. Otherwise contact the repository owner privately before publishing exploit details. Public issues are appropriate for non-sensitive documentation or integration bugs. No guaranteed response time, paid bounty or independent audit is represented by this document.</p>
+</main><footer>Experimental sandbox · Test credits have no monetary value · <a href="/privacy">Privacy</a></footer></body></html>
