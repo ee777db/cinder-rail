@@ -2,9 +2,9 @@
 
 - Live application: https://cinder-rail.ee777db.workers.dev
 - Source: https://github.com/ee777db/cinder-rail
-- Release: v0.1.0 public alpha
+- Release: https://github.com/ee777db/cinder-rail/releases/tag/v0.1.0 (public alpha)
 - Deployed: 2026-09-05 UTC
-- Cloudflare Worker version: `1dc8ca09-b45d-4cf1-b112-3e9d418c651d`
+- Cloudflare Worker version: `17aad063-259a-4722-a7d9-97f92dc55507`
 - Runtime: Cloudflare Workers, SQLite-backed Durable Objects, Workers AI
 - Model: `@cf/meta/llama-3.1-8b-instruct-fp8-fast`
 
@@ -36,3 +36,7 @@ Public tests consume the shared bounded sandbox allowance. Set `CINDER_TEST_AI=1
 Public compute sandbox, source code, protocol/economics/security documentation, agent client, receipt verifier and signed sample. Real-money settlement and Solidity contracts are not deployed; no token, customer deposit, ZK inference proof or TEE attestation is offered. Publication is not evidence of paying customers or adoption.
 
 No private key, session token or account credential is included in the published source or example receipt. The issuer key JSON is public and pins this deployment's signer. Service quotas are application limits rather than an account-wide billing cap.
+
+## Distribution completed
+
+Public GitHub repository, public alpha release announcement in English and Chinese, attached signed inference evidence, live homepage linked from the repository, accurate discovery topics, website launch page, sitemap, robots file and machine-readable service discovery are published. No direct messages, paid ads or claimed customer acquisition were part of this release.
