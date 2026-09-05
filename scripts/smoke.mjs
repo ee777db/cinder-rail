@@ -4,10 +4,13 @@
  * Run: CINDER_URL=http://127.0.0.1:8787 node scripts/smoke.mjs
  * Defaults: two short-lived sessions, deterministic hashing only, no AI calls.
  * Optional: CINDER_TEST_AI=1 or CINDER_TEST_EXPIRY=1 (waits for actual quote expiry).
+ * To save public AI receipt evidence, also set CINDER_PROOF_PATH=artifacts/live-proof.json.
  */
 import assert from 'node:assert/strict';
 import { webcrypto } from 'node:crypto';
 import { setTimeout as pause } from 'node:timers/promises';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 
 const crypto = globalThis.crypto ?? webcrypto;
 const base = new URL(process.env.CINDER_URL || 'http://127.0.0.1:8787');
@@ -297,8 +300,23 @@ try {
       const prompt = 'In one sentence, define a cryptographic hash.';
       const before = await state(main);
       const value = await quote(main, prompt, 'inference');
-      await verifyResult(await execute(await authorize(main, value, prompt)), value, prompt, issuer, { deterministic: false });
+      const result = await verifyResult(await execute(await authorize(main, value, prompt)), value, prompt, issuer, { deterministic: false });
       assert.equal((await state(main)).spentMicros, before.spentMicros + value.amountMicros);
+      const proof = {
+        testedAt: new Date().toISOString(), origin: base.origin, prompt, output: result.output,
+        quote: value, receipt: result.receipt, signature: result.signature,
+        signingPayload: result.signingPayload, issuerPublicKey: issuer.publicKey, issuerKeyId: issuer.keyId,
+        checks: { receiptSignatureValid: true, alteredReceiptRejected: true, inputHashValid: true, outputHashValid: true },
+        scope: 'An actual provider response with a verified operator-issued P-256 signature. This does not establish inference correctness, prove model execution cryptographically, or settle real money.',
+      };
+      console.log(`LIVE OUTPUT: ${result.output}`);
+      console.log(`VERIFIED RECEIPT: ${result.receipt.id}; issuer ${issuer.keyId}; signature ECDSA-P256-SHA256`);
+      if (process.env.CINDER_PROOF_PATH) {
+        const proofPath = resolve(process.env.CINDER_PROOF_PATH);
+        mkdirSync(dirname(proofPath), { recursive: true });
+        writeFileSync(proofPath, JSON.stringify(proof, null, 2) + '\n', { mode: 0o644 });
+        console.log(`Public verification artifact: ${proofPath}`);
+      }
     });
   } else {
     console.log('SKIP live inference (set CINDER_TEST_AI=1 to make one real provider call)');

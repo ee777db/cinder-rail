@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
 Disallow: /api/sessions/
+Sitemap: https://cinder-rail.ee777db.workers.dev/sitemap.xml

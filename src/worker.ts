@@ -81,7 +81,7 @@ async function route(request: Request,env: Env): Promise<Response> {
   }
   if(path.startsWith('/api/')) return fail(404,'not_found','Unknown API route or method.');
   if(!['GET','HEAD'].includes(request.method)) return fail(405,'method_not_allowed','Use GET to read this page.');
-  const pages: Record<string,string>={'/protocol':'/index.html','/developers':'/index.html','/launch':'/index.html','/security':'/security.html','/privacy':'/privacy.html'};
+  const pages: Record<string,string>={'/':'/index.html','/protocol':'/index.html','/developers':'/index.html','/launch':'/index.html','/security':'/security.html','/privacy':'/privacy.html'};
   if(pages[path]) url.pathname=pages[path];
   return env.ASSETS.fetch(new Request(url.toString(),request));
 }

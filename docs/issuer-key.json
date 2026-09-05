@@ -1,0 +1,1 @@
+{"publicKey":{"kty":"EC","key_ops":["verify"],"ext":true,"crv":"P-256","x":"Dn8F23HBUy5a01YJA3mE6OPsGnb_q4KDEjhn__eKJnc","y":"9CwPFnbUfHAMvO5TxXqfXY-y9cqHBZog0MPAYU5br4s"},"keyId":"cinder-p256-15d1b78400b9a6d3","algorithm":"ECDSA-P256-SHA256","trust":"Operator-issued key. Pin this key for independent verification."}

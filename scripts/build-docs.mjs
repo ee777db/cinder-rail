@@ -13,5 +13,5 @@ await fs.writeFile('public/docs.css',`*{box-sizing:border-box}body{margin:0;back
 await fs.writeFile('public/llms.txt',`# Cinder Rail\n\nExperimental HTTP 402 compute sandbox. No real payments or token.\n\n- [Console](/)\n- [Developer guide](/developers)\n- [API catalog](/api/catalog)\n- [Issuer public key](/api/key)\n- [Architecture](/docs/architecture.md)\n- [Security](/docs/security.md)\n\nProtocol is cinder-sandbox-v1, not x402 wire compatible. Denomination sandbox-microUSD is nonredeemable test accounting. Agent keys ECDSA P-256; provider receipt signatures certify provenance, not inference correctness.\n`);
 await fs.mkdir('public/.well-known',{recursive:true});
 await fs.writeFile('public/.well-known/cinder.json',JSON.stringify({name:'Cinder Rail',version:'0.1.0',protocol:'cinder-sandbox-v1',mode:'sandbox',catalog:'/api/catalog',issuerKey:'/api/key',openapi:'/openapi.json',documentation:'/developers',realPayments:false,x402Compatible:false},null,2));
-await fs.writeFile('public/robots.txt','User-agent: *\nAllow: /\nDisallow: /api/sessions/\n');
+await fs.writeFile('public/robots.txt','User-agent: *\nAllow: /\nDisallow: /api/sessions/\nSitemap: https://cinder-rail.ee777db.workers.dev/sitemap.xml\n');
 console.log(`Built ${files.length} protocol documents, privacy, security and agent discovery files.`);

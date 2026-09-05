@@ -1,0 +1,62 @@
+{
+  "issuer": {
+    "publicKey": {
+      "kty": "EC",
+      "key_ops": [
+        "verify"
+      ],
+      "ext": true,
+      "crv": "P-256",
+      "x": "Dn8F23HBUy5a01YJA3mE6OPsGnb_q4KDEjhn__eKJnc",
+      "y": "9CwPFnbUfHAMvO5TxXqfXY-y9cqHBZog0MPAYU5br4s"
+    },
+    "keyId": "cinder-p256-15d1b78400b9a6d3",
+    "algorithm": "ECDSA-P256-SHA256",
+    "trust": "Operator-issued key. Pin this key for independent verification."
+  },
+  "quote": {
+    "id": "8ed76274-af65-4081-a254-ed22bc39de96",
+    "sessionId": "430fc7d41122d8cade7c317432c61e525b1199d5d0c1dc5aa3ccdc9e09d4ffb0",
+    "service": "inference",
+    "inputHash": "36b93c66a9aa46ab3ddca7b004aee04c6fb66f6f1a2380bd51c058782b7ccf3e",
+    "amountMicros": 500,
+    "cumulativeMicros": 500,
+    "nonce": "111a582d-59b3-4e05-afbe-179c609b2a4e",
+    "issuedAt": "2026-09-05T01:23:30.956Z",
+    "expiresAt": "2026-09-05T01:25:30.956Z"
+  },
+  "receipt": {
+    "id": "c26f74b0-7a26-42f0-b4c3-877eba990410",
+    "sessionId": "430fc7d41122d8cade7c317432c61e525b1199d5d0c1dc5aa3ccdc9e09d4ffb0",
+    "quoteId": "8ed76274-af65-4081-a254-ed22bc39de96",
+    "service": "inference",
+    "model": "@cf/meta/llama-3.1-8b-instruct-fp8-fast",
+    "inputHash": "36b93c66a9aa46ab3ddca7b004aee04c6fb66f6f1a2380bd51c058782b7ccf3e",
+    "outputHash": "b2862743d6ee785f12cfe176f601cb53ea2a17cdd42fd4fa083fecc07358a536",
+    "amountMicros": 500,
+    "cumulativeMicros": 500,
+    "issuedAt": "2026-09-05T01:23:31.874Z",
+    "keyId": "cinder-p256-15d1b78400b9a6d3",
+    "verification": "signed-receipt",
+    "mode": "sandbox",
+    "unit": "sandbox-microUSD",
+    "durationMs": 520,
+    "usage": {
+      "maxOutputTokens": 192,
+      "providerReported": {
+        "prompt_tokens": 71,
+        "completion_tokens": 35,
+        "total_tokens": 106,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "neurons": 1.5127918720245361
+      }
+    }
+  },
+  "signature": "_R8Hw6zQMleg4XjW20VR_aCb4sCk1Mc9HUlj9VCA6Z0bwYszJeymX-oo0SQDqRG1ffVyq-3Xzdp0XZ13n2qZ-Q",
+  "signingPayload": "{\"amountMicros\":500,\"cumulativeMicros\":500,\"durationMs\":520,\"id\":\"c26f74b0-7a26-42f0-b4c3-877eba990410\",\"inputHash\":\"36b93c66a9aa46ab3ddca7b004aee04c6fb66f6f1a2380bd51c058782b7ccf3e\",\"issuedAt\":\"2026-09-05T01:23:31.874Z\",\"keyId\":\"cinder-p256-15d1b78400b9a6d3\",\"mode\":\"sandbox\",\"model\":\"@cf/meta/llama-3.1-8b-instruct-fp8-fast\",\"outputHash\":\"b2862743d6ee785f12cfe176f601cb53ea2a17cdd42fd4fa083fecc07358a536\",\"quoteId\":\"8ed76274-af65-4081-a254-ed22bc39de96\",\"service\":\"inference\",\"sessionId\":\"430fc7d41122d8cade7c317432c61e525b1199d5d0c1dc5aa3ccdc9e09d4ffb0\",\"unit\":\"sandbox-microUSD\",\"usage\":{\"maxOutputTokens\":192,\"providerReported\":{\"completion_tokens\":35,\"neurons\":1.5127918720245361,\"prompt_tokens\":71,\"prompt_tokens_details\":{\"cached_tokens\":0},\"total_tokens\":106}},\"verification\":\"signed-receipt\"}",
+  "output": "A machine should check its spending limit before calling a paid API to prevent unexpected charges and ensure it does not exceed its allocated budget, thereby avoiding financial losses or service disruptions.",
+  "balanceMicros": 9500,
+  "verified": true
+}

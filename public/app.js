@@ -194,7 +194,7 @@ async function startConsole() {
     const r = data.receipt;
     if (!r || typeof data.output !== 'string' || typeof data.signature !== 'string' || data.signature.length > 256) throw new Error('The receipt is incomplete. Verification failed.');
     const payload = canonical(r);
-    if (data.signingPayload && data.signingPayload !== payload) throw new Error('Receipt serialization does not match the signed payload.');
+    if (typeof data.signingPayload !== 'string' || data.signingPayload !== payload) throw new Error('Receipt serialization does not match the signed payload.');
     if (r.sessionId !== state.session.sessionId || r.quoteId !== quote.id || r.service !== quote.service || r.inputHash !== inputHash || r.amountMicros !== quote.amountMicros || r.cumulativeMicros !== quote.cumulativeMicros || r.keyId !== state.issuer.keyId || r.mode !== 'sandbox' || r.unit !== 'sandbox-microUSD' || r.verification !== 'signed-receipt' || !Number.isFinite(Date.parse(r.issuedAt))) throw new Error('Receipt fields do not match the authorized request. Verification failed.');
     const service = state.services.find(service => service.id === quote.service);
     if (service?.model && r.model !== service.model) throw new Error('Receipt model does not match the selected service.');
