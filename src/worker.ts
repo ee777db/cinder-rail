@@ -1,6 +1,9 @@
+import {NativeLedger,handleNative} from './native-ledger';
+export {NativeLedger};
 import {DurableObject} from 'cloudflare:workers';
 import {canonical,encoder,base64url,unbase64url,sha256,SERVICES,UNIT,validPublicKey,selectInput} from './protocol';
 interface Env {
+  NATIVE: DurableObjectNamespace<NativeLedger>;
   SESSIONS: DurableObjectNamespace<ComputeSession>;
   CONTROL: DurableObjectNamespace<ControlPlane>;
   ASSETS: Fetcher;
@@ -33,6 +36,7 @@ async function gate(env: Env, action: string, ip: string): Promise<Response|null
 }
 function secure(response: Response, request: Request) {
   const headers = new Headers(response.headers);
+  if(new URL(request.url).pathname.startsWith('/api/native/')){headers.set('Access-Control-Allow-Origin','*');headers.set('Access-Control-Allow-Headers','content-type');headers.set('Access-Control-Allow-Methods','GET, POST, OPTIONS');}
   headers.set('X-Content-Type-Options','nosniff');
   headers.set('Referrer-Policy','strict-origin-when-cross-origin');
   headers.set('X-Frame-Options','DENY');
@@ -51,6 +55,7 @@ export default {
 };
 async function route(request: Request,env: Env): Promise<Response> {
   const url = new URL(request.url); const path=url.pathname;
+  if(path.startsWith('/api/native/'))return handleNative(request,env);
   if(request.method === 'OPTIONS') return new Response(null,{status:204,headers:{Allow:'GET, POST, OPTIONS'}});
   if(request.method === 'POST') {
     const origin=request.headers.get('origin');
@@ -81,7 +86,7 @@ async function route(request: Request,env: Env): Promise<Response> {
   }
   if(path.startsWith('/api/')) return fail(404,'not_found','Unknown API route or method.');
   if(!['GET','HEAD'].includes(request.method)) return fail(405,'method_not_allowed','Use GET to read this page.');
-  const pages: Record<string,string>={'/':'/index.html','/protocol':'/index.html','/developers':'/index.html','/launch':'/index.html','/security':'/security.html','/privacy':'/privacy.html'};
+  const pages: Record<string,string>={'/':'/native.html','/native':'/native.html','/compute':'/index.html','/protocol':'/native.html','/developers':'/index.html','/launch':'/index.html','/security':'/security.html','/privacy':'/privacy.html'};
   if(pages[path]) url.pathname=pages[path];
   return env.ASSETS.fetch(new Request(url.toString(),request));
 }
