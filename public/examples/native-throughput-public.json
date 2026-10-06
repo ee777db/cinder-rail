@@ -1,0 +1,140 @@
+{
+  "kind": "cinder-native-channel-throughput-v1",
+  "success": true,
+  "network": "https://cinder-rail.ee777db.workers.dev",
+  "chainId": "cinder-devnet-1",
+  "startedAt": "2026-10-06T03:38:47.294Z",
+  "finishedAt": "2026-10-06T03:47:29.129Z",
+  "runId": "4257075a-fca7-446b-99b8-b71b8d746c3e",
+  "configuration": {
+    "requestedCalls": 1000,
+    "configuredConcurrency": 4,
+    "activeChannels": 4,
+    "requestTimeoutMs": 30000,
+    "maxAttemptsPerRequest": 3,
+    "channelLifetimeMs": 86400000
+  },
+  "calls": {
+    "requested": 1000,
+    "verifiedAcknowledgmentsInSteadyWindow": 1000,
+    "recoveredFromJournalDuringCleanup": 0,
+    "verifiedSettled": 1000,
+    "networkAttempts": 1001
+  },
+  "timing": {
+    "totalMs": 521834.63,
+    "setupMs": 5023.303,
+    "steadyWindowMs": 511552.868,
+    "cleanupMs": 5258.449,
+    "verifiedCallsPerSecond": 1.954832,
+    "latencyMs": {
+      "sampleCount": 1000,
+      "min": 357.829,
+      "p50": 1506.197,
+      "p95": 3913.196,
+      "max": 13013.541,
+      "mean": 2041.37
+    }
+  },
+  "accounting": {
+    "unit": "CINDER atom",
+    "openingFeesAtoms": "48",
+    "verifiedClosingFeesAtoms": "48",
+    "verifiedNetworkFeesAtoms": "96",
+    "verifiedResourceSettledAtoms": "100000",
+    "verifiedUnusedCollateralRefundedAtoms": "0",
+    "verifiedTotalCostAtoms": "100096",
+    "allKnownOpeningsSettled": true
+  },
+  "channels": [
+    {
+      "index": 0,
+      "channelId": "f7a85b0712032c6f1ddf7f68769f9a41acdbfbca1add532c0401bc5d134ba08ca4dc69893a90c7b0536a5d259ef8bd8d",
+      "capacity": 250,
+      "confirmedOpen": true,
+      "notFoundAtCleanup": false,
+      "acknowledgedCalls": 250,
+      "recoveredCalls": 0,
+      "openingTransactionHash": "f7a85b0712032c6f1ddf7f68769f9a41acdbfbca1add532c0401bc5d134ba08ca4dc69893a90c7b0536a5d259ef8bd8d",
+      "settlement": {
+        "transactionHash": "f6216d1a7427a2797113e4cb866c5bae744a95b8a075ce0153d314687beed111148ab74f77d10992e592bedd85ab50da",
+        "checkpointHeight": 36,
+        "checkpointHash": "bc7e614b81d1bb712dbba87df0160285605a4108745426d4dce8ec3d59c4f10cbe841ac9f9b8acac6443530aea527604",
+        "reason": "owner",
+        "servedCalls": 250,
+        "journalHead": "4fb5c422ca7e469cc138b88e817b142a0351349eeaa712e7484dc00c1e46de9715d514886fdd6fae3da4d7b058baaf53",
+        "settledAtoms": "25000",
+        "refundedAtoms": "0",
+        "feeAtoms": "12"
+      }
+    },
+    {
+      "index": 1,
+      "channelId": "2855d40da50297d183d0aeff732d2a1df4198ba1ec559befd5223ffe68219536fcf9832ab27a1ab28acaff2652818c3c",
+      "capacity": 250,
+      "confirmedOpen": true,
+      "notFoundAtCleanup": false,
+      "acknowledgedCalls": 250,
+      "recoveredCalls": 0,
+      "openingTransactionHash": "2855d40da50297d183d0aeff732d2a1df4198ba1ec559befd5223ffe68219536fcf9832ab27a1ab28acaff2652818c3c",
+      "settlement": {
+        "transactionHash": "fb34aa20dd273d1672bf0bf07276dfbf0b597d71156db306a0bc651527409ddccc9fac4eee9b4b3b846c24a2450df81f",
+        "checkpointHeight": 37,
+        "checkpointHash": "d46069f63fad66d864442efb9cfb1ff541d1bd3f649024d765d1c1daa618d7944b810a9ab7061e67f68f1155d717d835",
+        "reason": "owner",
+        "servedCalls": 250,
+        "journalHead": "dd8561d6e61cf5964639b22bb9699179636bce6a5213d8c6af95a12299d481de648ebc59de58a2a6476b194f23f0599f",
+        "settledAtoms": "25000",
+        "refundedAtoms": "0",
+        "feeAtoms": "12"
+      }
+    },
+    {
+      "index": 2,
+      "channelId": "2defb5e171678ebc4791ed586d14f0dedf3005c05d02be17e52c2ddd76bf07a5b49187a358190ec1ba99c7438b73fcb9",
+      "capacity": 250,
+      "confirmedOpen": true,
+      "notFoundAtCleanup": false,
+      "acknowledgedCalls": 250,
+      "recoveredCalls": 0,
+      "openingTransactionHash": "2defb5e171678ebc4791ed586d14f0dedf3005c05d02be17e52c2ddd76bf07a5b49187a358190ec1ba99c7438b73fcb9",
+      "settlement": {
+        "transactionHash": "380f3f94c43355e4c3a485262de12b071ba3be61f4f84253004d2adb8a04dc0f5ed534fcf855318edceac4d64f120d13",
+        "checkpointHeight": 38,
+        "checkpointHash": "5ad52a56ca9ff8de53f023b9df35832cb5dd2786be86eb5e8d0c8dbcb906714b0f4c4b53172dafa429efcd2bf7ea8e24",
+        "reason": "owner",
+        "servedCalls": 250,
+        "journalHead": "b4e326fc4581c366198b867296ddafce42c29eefe08af82e4ba5ca6936bac9bb0d2ef763b5db36a0fcce8cd813886d33",
+        "settledAtoms": "25000",
+        "refundedAtoms": "0",
+        "feeAtoms": "12"
+      }
+    },
+    {
+      "index": 3,
+      "channelId": "d8a871b5d35ff3e7841ae5918494c127b1ec8c9a6720f160608d370d7a8d4d564105d3c028284780db0707aee53d667d",
+      "capacity": 250,
+      "confirmedOpen": true,
+      "notFoundAtCleanup": false,
+      "acknowledgedCalls": 250,
+      "recoveredCalls": 0,
+      "openingTransactionHash": "d8a871b5d35ff3e7841ae5918494c127b1ec8c9a6720f160608d370d7a8d4d564105d3c028284780db0707aee53d667d",
+      "settlement": {
+        "transactionHash": "bc15115bb4c76d084749879d9f2e1dde70d21d49af95a69fe0521ce2df9ddcf0e1ab222bb26e03cfa259efc1129d9f0b",
+        "checkpointHeight": 39,
+        "checkpointHash": "617807231661968fd4567ddd631cb8dbfb2204f589516eb0ba61de5da4089f717d51404b099c8a01c3aca9476f97e007",
+        "reason": "owner",
+        "servedCalls": 250,
+        "journalHead": "3a6fac4a491cc5b4a315b9bc85e6851c76c6adec81ef2f99be51d65bb1ee27f947e51a4fbb96f0d229ff67f7d0a82f3c",
+        "settledAtoms": "25000",
+        "refundedAtoms": "0",
+        "feeAtoms": "12"
+      }
+    }
+  ],
+  "failures": [],
+  "cleanupFailures": [],
+  "interrupted": false,
+  "scope": "Measured short-window deterministic SHA-384 channel calls. Each channel is sequential; channels share one operator ledger. Latency includes local signing, transport, exact retries and SDK verification. Call acknowledgments are provisional; verified closing checkpoints settle collateral. No dollar-price, independent-consensus finality or sustained-one-hour throughput claim.",
+  "recovery": "Keys remain only in this process. Unknown opening IDs and close transaction IDs are public recovery context, not private credentials. Exact retries preserve authorizations; unresolved channels retain their configured automatic-expiry settlement path. No secret keys are exported."
+}

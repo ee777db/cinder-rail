@@ -1,0 +1,76 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native WORK and spot market interface — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>Native WORK and spot market interface</h1>
+<p><code>src/native-economy.ts</code> is a pure atomic transition for the Cinder devnet. It adds a resource asset with real inventory movements and a CINDER/WORK spot pool. It does not call a network, mint CINDER, create an exchange price guarantee, or implement decentralized consensus.</p>
+<p>WORK has zero decimals. One unit reserves one operator-provided SHA-384 computation for a well-formed UTF-8 input of 1–4000 JavaScript characters. Initial inventory is exactly <strong>1,000,000 WORK</strong>, created once at economy genesis; no user action mints additional WORK. The operator posts inventory at <strong>100 CINDER atoms per WORK</strong>. This is a capacity promise of the devnet operator, not audited physical capacity, a dollar peg, or redemption for money.</p>
+<h2>Integration contract</h2>
+<pre><code class="language-ts">economyAccounts(action, sender): string[]
+applyEconomy(snapshot, stateOrUndefined, tx, now): {
+  accounts, postings, result, state
+}
+</code></pre>
+<p>Use exactly <strong>one</strong> economy action in a normal signed native transaction. The module validates the native transaction shape, deadline and next nonce, enforces the signed gross <code>maxDebitAtoms</code>, debits the <strong>12-atom</strong> base fee, and increments the sender&#39;s native nonce. <strong>Do not additionally charge the fee, increment the nonce, or run <code>applyNativeTransaction</code>.</strong> The caller still verifies the ML-DSA signature and handles transaction-ID idempotency, serialized execution and persistence.</p>
+<p>Load every native account returned by <code>economyAccounts</code>. This includes the sender, a WORK-transfer recipient when present, <code>system:fees</code>, <code>system:economy-pool</code>, and <code>system:economy-provider</code>. The last two are ordinary holding accounts initialized with <strong>zero CINDER</strong>, never minted liquidity. Registered native recipients must exist before WORK transfers. Ordinary native transfer APIs must not allow arbitrary deposits into these economy holding accounts, because pool balance must equal recorded pool reserves.</p>
+<p>State shape:</p>
+<pre><code class="language-ts">{
+  version: 1,
+  inventoryWork, burnedWork, walletWorkTotal, walletLpTotal, // integer strings
+  walletCount,                                            // bounded number
+  pool: { cinderAtoms, workUnits, lpSupply },                // integer strings
+  wallets: { [nativeAddress]: { workUnits, lpUnits } }
+}
+</code></pre>
+<p><strong><code>wallets</code> is a partial loaded record map.</strong> Persist the global fields without <code>wallets</code> under one key; persist each wallet separately, e.g. <code>economy:wallet:&lt;address&gt;</code>. Before a transition, load all existing wallet shards for the native addresses returned by <code>economyAccounts</code>; omit genuinely new wallets, rather than adding fake zero records. Persist only returned wallet records, preserving all unlisted shards. A zero-balance initialized wallet remains stored and counted. Commit updated native accounts, global economy state, changed wallet records and the signed receipt in <strong>one atomic serialized write</strong>. An error commits nothing. The module never mutates its input snapshots.</p>
+<p>Global accounting is <code>inventoryWork + burnedWork + walletWorkTotal + pool.workUnits = 1,000,000</code> and <code>walletLpTotal = pool.lpSupply</code>. Stored wallet shards are authoritative: aggregate counters cannot independently detect a missing shard supplied by an incorrect caller. <code>auditEconomy(state, poolNativeBalance, {completeWalletSet:true})</code> verifies every shard when the complete wallet set is supplied. Ordinary transitions use partial audit plus exact aggregate deltas and native-pool backing checks.</p>
+<h2>Exact action fields</h2>
+<p>All quantities below are canonical decimal integer <strong>strings</strong>. All deadlines are canonical ISO strings live within five minutes. Unknown or missing fields are rejected.</p>
+<table>
+<thead>
+<tr>
+<th>Action <code>type</code></th>
+<th>Other required fields</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>economy.buy</code></td>
+<td><code>workUnits</code>, <code>maxCinderAtoms</code></td>
+</tr>
+<tr>
+<td><code>economy.transfer</code></td>
+<td><code>to</code>, <code>workUnits</code></td>
+</tr>
+<tr>
+<td><code>economy.redeem</code></td>
+<td><code>inputHash</code> (96 lowercase SHA-384 hex characters)</td>
+</tr>
+<tr>
+<td><code>economy.addLiquidity</code></td>
+<td><code>maxCinderAtoms</code>, <code>maxWorkUnits</code>, <code>minLpUnits</code>, <code>deadline</code></td>
+</tr>
+<tr>
+<td><code>economy.removeLiquidity</code></td>
+<td><code>lpUnits</code>, <code>minCinderAtoms</code>, <code>minWorkUnits</code>, <code>deadline</code></td>
+</tr>
+<tr>
+<td><code>economy.swap</code></td>
+<td><code>assetIn</code> (<code>CINDER</code> or <code>WORK</code>), <code>amountIn</code>, <code>minOut</code>, <code>deadline</code></td>
+</tr>
+</tbody></table>
+<p>The signed gross CINDER debit is 12 plus posted purchase cost, actual CINDER supplied to liquidity, or CINDER swap input. WORK transfer, redemption, LP removal and WORK-input swaps require 12 CINDER already available to pay the fee; future swap or withdrawal proceeds cannot finance that fee. WORK itself is bounded by signed action quantities. Slippage minima are positive integers.</p>
+<p>Bounds: 10,000 WORK input per purchase, transfer, liquidity deposit or swap; 100,000 WORK per wallet; 1,000,000,000 CINDER atoms per market/purchase input; 5,000 initialized economy wallets; one pair; no LP transfer, leverage, public mint, borrow or flash-loan action.</p>
+<p><strong>Redemption execution requirement:</strong> the result contains <code>result.redemption = {service:&#39;hash&#39;,inputHash,workUnits:&#39;1&#39;,maxInputChars:4000}</code>. The root must validate the separately supplied input, compute its SHA-384 digest, and produce the actual deterministic output <strong>before atomically persisting</strong> the one-WORK burn and receipt. If input validation or execution fails, discard the transition. Add output/input commitments and completed execution evidence to the signed result. The module alone produces a proposed burn; it does not claim that computation ran. Since this bounded deterministic operation is synchronous, no asynchronous failure-refund mechanism is needed for this action.</p>
+<h2>Quotes and pool arithmetic</h2>
+<pre><code class="language-ts">quoteWork(workUnits, state?) // {workUnits,cinderAtoms,priceCinderAtoms}
+quoteSwap(state, assetIn, amountIn) // {assetIn,assetOut,amountIn,amountOut,swapFeeBps}
+quoteAddLiquidity(state, maxCinderAtoms, maxWorkUnits)
+// {cinderAtoms,workUnits,lpUnits,unusedCinderAtoms,unusedWorkUnits}
+quoteRemoveLiquidity(state, lpUnits) // {lpUnits,cinderAtoms,workUnits}
+economyWallet(state, address) // {workUnits,lpUnits}, zero if genuinely absent
+economyInfo(state?) // asset,offer,pool,fee/bounds,audit,state(global + empty wallets)
+auditEconomy(state?, actualPoolCinderBalance?, {completeWalletSet?})
+initialEconomyState() // bounded genesis, never funded pool reserves
+</code></pre>
+<p>Read-only quotes neither reserve a price nor establish wallet ownership or available funds. The transition rechecks balances and signed minima. <code>economyInfo().state</code> can be passed to quote helpers; it contains global state and an empty partial wallet map. Wallet reads must load the requested wallet shard first.</p>
+<p>No pool trade is possible before a user deposits both assets. Initial LP issuance is <code>floor(sqrt(CINDER × WORK))</code>. Later LP minting is the minimum of the two proportional floored share amounts. Actual deposits are rounded <strong>up</strong> from minted shares, never above either signed maximum; unused contributions remain in the wallet. Withdrawals return each reserve multiplied by shares and divided by total LP, rounded <strong>down</strong>. A complete LP withdrawal removes every reserve and resets the pool to empty; there is no permanently locked minimum LP. A withdrawal must return at least one unit of both assets. Dust remains with continuing LP holders.</p>
+<p>For input <code>a</code>, input reserve <code>x</code>, output reserve <code>y</code>, the swap output is <code>floor(a × 9970 × y / (x × 10000 + a × 9970))</code>. The full input enters the pool, so the 30-basis-point trading fee stays with LP holders. The native 12-atom fee is separate. The transition asserts that <code>x × y</code> does not decrease across a swap. Prices can move sharply in a small pool; signed <code>minOut</code> limits execution, not price discovery or ordering risk.</p>
+<p>The arithmetic follows the established constant-product and proportional-share approach documented in the <a href="https://docs.uniswap.org/whitepaper.pdf">Uniswap v2 whitepaper</a> and <a href="https://github.com/Uniswap/v2-core/blob/master/contracts/UniswapV2Pair.sol">core implementation</a>. This is a separate devnet ledger implementation with different custody, ordering, LP initialization and execution rules, not an audited Uniswap deployment.</p>
+<p>Run <code>node --test tests/native-economy.test.mjs</code> for pure accounting, partial-shard, rounding and adversarial tests.</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

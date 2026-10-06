@@ -113,7 +113,7 @@ async function verifyReceipt(receipt, expectedTransactionHash) {
   if (receipt.transaction.domain === 'cinder.transaction.v1') {
     assert.equal(nativeVerify(receipt.transaction, receipt.signature, await senderKey(receipt.transaction.sender)), true, 'Payer ML-DSA transaction signature');
   } else {
-    assert.equal(receipt.transaction.domain, 'cinder.compute-settlement.v1');
+    assert.ok(['cinder.compute-settlement.v1','cinder.channel-expiry.v1'].includes(receipt.transaction.domain));
     assert.equal(receipt.signature, null, 'Compute settlements are authorized by the operator checkpoint');
   }
   assert.equal(receipt.transaction.chainId, info.chainId);

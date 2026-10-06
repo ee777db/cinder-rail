@@ -1,0 +1,180 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>这个时代需要什么币：从真实工作、流动摩擦到 CINDER — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>这个时代需要什么币：从真实工作、流动摩擦到 CINDER</h1>
+<p>研究口径：2026-10-05。本报告综合本次核验的官方文档与当前 CINDER 仓库实现。它判断的是技术和业务在什么条件下可能持续，不预测价格，也不把项目路线图当作已经兑现的能力。文中的“判断”是分析；部署、测试和运行表现应以对应版本的实际记录为准。</p>
+<p>我的判断是：这个时代更需要<strong>可以被程序安全使用的钱、清楚的资源权益，以及可以检查的交付和结算规则</strong>。这些工作不必由同一枚币承担。一个币能否持续，取决于它让谁更容易完成了什么、谁愿意付费、谁承担成本，以及这些活动为什么需要该币。名字包含 AI、注意力、资源或抗量子，并不能代替这条因果链。</p>
+<p>“离火”可以作为理解数字化、智能和注意力变化的文化视角，但不能用来推导供给规则、价格、共识安全或哪个项目必胜。我们应把其中有用的直觉落实为问题：当代理变多、内容变多、交易变快，怎样减少完成真实任务的摩擦，同时保住授权、真实性、隐私和退出能力？</p>
+<p>完整的逐项材料分为三份，避免在这里再复制几十行表格：</p>
+<ul>
+<li><a href="/docs/coin-research-networks.html">基础网络、隐私与支付资产</a>：BTC、ETH、XRP、SOL、ZEC、XMR、DOGE、LTC、BNB、ADA、NEAR、AVAX、SUI、ARB、POL、ATOM、FLOW、WAVES、HIVE、MANTRA、USDD，另含 OP 对照。</li>
+<li><a href="/docs/coin-research-applications.html">金融、AI 与应用代币</a>：HYPE、LINK、UNI、AAVE、MORPHO、ONDO、ENA、LDO、ETHFI、JUP、PENDLE、TAO、WLD、KAITO、VVV、VIRTUAL、ZRO、PUMP、LIT、XPL；LIT 分开解释 Lighter 与旧 Litentry / HEI。</li>
+<li><a href="/docs/coin-research-identity.html">OPG、文化资产与同名辨认</a>：本次 OPG 指 <strong>OpenGradient</strong>，与 Optimism 的 OP 是不同资产；另说明 FARTCOIN、KPEPE、KSHIB、USELESS、PONS、CASHCAT 的身份和证据边界。</li>
+</ul>
+<h2>先区分网络、产品和持币权利</h2>
+<p>一条网络可以长期有用，某个应用可以收费成功，而同名代币仍可能没有对收入的直接索取权。这不是一句“币都没用”，而是要求分别回答三个问题。</p>
+<table>
+<thead>
+<tr>
+<th>观察对象</th>
+<th>真正应该问的问题</th>
+<th>不能越过的推论</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>网络</td>
+<td>能否在可接受的费用、开放性和安全假设下保存并执行规则？</td>
+<td>TPS 高不等于商业需求高；节点快也不等于独立最终确认快。</td>
+</tr>
+<tr>
+<td>产品</td>
+<td>是否有人在没有补贴时仍愿意付费、复购并承担切换成本？</td>
+<td>用户多不等于净收入高；交易量也可能来自刷量或反复搬运资金。</td>
+</tr>
+<tr>
+<td>代币</td>
+<td>是 gas、安全质押、准入、资源兑换、治理，还是具体分配机制？</td>
+<td>治理不等于股权；回收入库不等于销毁；销毁不等于价格必涨。</td>
+</tr>
+<tr>
+<td>外部权益</td>
+<td>服务、资产、赎回、身份或版权由谁承诺，违约怎样处理？</td>
+<td>链上记录存在，不等于链下权益已经真实、可执行或充分担保。</td>
+</tr>
+</tbody></table>
+<p>例如，ONDO 不等于其关联产品中的国债份额；LDO 不等于 stETH；ENA 不等于 USDe 或 sUSDe；HYPE 不等于 HLP；PENDLE 不等于本金头寸 PT。把这些东西混为一谈，技术比较和经济判断都会失真。<a href="/docs/coin-research-applications.html">具体权利及官方依据</a></p>
+<p>也不能停留在“治理币都没有收入联系”的旧概括。UNI 已启用范围内的协议费销毁、OP 的 2026 回购安排、LDO 有盈余条件的 NEST，代表不同分配路径。它们仍分别受适用范围、治理、运营成本和执行条件约束。<strong>代币的经济连接必须逐项核验，而且会变化。</strong><a href="/docs/coin-research-applications.html">应用机制</a>、<a href="https://gov.optimism.io/t/buyback-communication-thread/10588">OP 执行记录</a></p>
+<h2>“最小作用、最大流动”怎样成为可检验的设计原则</h2>
+<p>我愿意采用这个直觉，但把它定义为：在明确的安全、隐私、权利和资源约束下，用更少操作、更少闲置资本和更低总成本，完成更多被用户接受的真实工作。物理学中的作用量驻值原理不能直接给加密资产排序；社会系统的偏好、激励和攻击者会改变约束。</p>
+<p>“少”要计算整个任务，而不只算链上手续费：获取资产、密钥保管、跨链兑换、授权、等待交付、核验、重试、退出和故障恢复。一次交易免费，但要先充值三种币、授权不明额度、等待退款，整体摩擦可能很高。反过来，签名验证、存储费和等待安全确认可能是保护用户所需的成本，不能为了漂亮数字删除。</p>
+<p>“流动”应指有用的完成量，而非资金不停转圈：一笔服务是否交付，一首音乐是否获得被授权的访问，一次分账是否准确，一次失败是否退回未消费资金。同一资金在机器人账户间循环一千次，没有因此产生一千次生产力。注意力和文化本身可以有价值，但文化交易、真实收听和可验证计算是不同事实。</p>
+<p>实用的比较方法是在相同任务和负载下，固定授权边界与交付标准，再记录完成率、总成本、延迟分布、资金占用、人工步骤、失败恢复率和非补贴复购。不同任务的权重可以不同，不必制造一个万能分数。<strong>快、便宜、安全、开放、隐私和可恢复性之间存在具体取舍；好的设计把取舍公开。</strong></p>
+<p>现有项目已经提供可学习的方法：HIVE 的可恢复资源额度、NEAR 的跨链体验、Sui 的对象并行、Cardano 的显式执行预算、Chainlink 的支付抽象，以及 x402 的请求内付款，都在减少不同环节的摩擦。它们的价值不需要靠“所有竞争者都失败”才能成立。<a href="/docs/coin-research-networks.html">网络机制</a>、<a href="/docs/coin-research-applications.html">应用机制</a>、<a href="https://docs.cdp.coinbase.com/x402/welcome">x402 请求流程</a></p>
+<h2>哪些技术与业务更可能留下</h2>
+<p>以下是按<strong>需求与证据的距离</strong>划分的条件层次，不是价格榜，也不是宣称同一组项目拥有相同质量。较靠前表示工作本身更容易说明和检验，不表示其代币必然回报更好。</p>
+<table>
+<thead>
+<tr>
+<th>判断层次</th>
+<th>代表工作与比较对象</th>
+<th>为什么可能持续；怎样推翻判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>核心需求明确，已有长期协作基础</td>
+<td>BTC 的独立货币与结算规则；ETH、SOL 的可组合执行；LINK 的数据连接；Uniswap、Aave、Morpho 的交换和信贷</td>
+<td>人们持续需要持有、转移、执行、定价和借贷。继续成立的条件是安全、流动性、维护和非补贴使用；严重事故、失去开放性、替代品更好或费用无法覆盖成本，都可能削弱它们。产品耐久仍须与币的收入权分开。</td>
+</tr>
+<tr>
+<td>明确产品或特定技术位置，竞争与分配更决定结果</td>
+<td>HYPE、JUP、Lighter 的交易入口；Pendle、Lido、ether.fi、Ethena 的资本管理；Ondo、Plasma 的资产与支付接入；XRP、LTC、XMR、ZEC 等不同支付或隐私取舍</td>
+<td>有具体客户和工作，不应简单称为“旧币”或“只有叙事”。能否留下取决于压力期表现、服务差异、退出条件及成本；某项技术领先不能代替持续使用，产品成功也不能直接归属于治理币。</td>
+</tr>
+<tr>
+<td>工程路线值得保留，必须证明不可替代的位置</td>
+<td>BNB、ADA、NEAR、AVAX、SUI、POL、ATOM、FLOW、WAVES、HIVE、MANTRA，以及 ARB / OP 等不同网络和扩容体系</td>
+<td>多种约束需要不同架构，未必只有一条链存活。但仅重复“更快、更低费”很容易被追上；应证明独有分发、开发工具、应用留存、主权规则或资源设计，并辨明生态流量是否真的需要本币。</td>
+</tr>
+<tr>
+<td>新需求可能扩大，交付与商业模式仍须持续验证</td>
+<td>OpenGradient、Venice、Virtuals、Bittensor、World、Kaito 等 AI、代理、身份与信息服务</td>
+<td>需求方向有现实依据，但不能把所有 AI 项目混为一类。应看模型服务复购、代理购买真实服务、身份被应用采用、评分能否抗操纵；若主要收入仍来自发币、补贴或奖励循环，长期判断要下调。</td>
+</tr>
+<tr>
+<td>文化与市场协调可以长存，生产权益不能凭叙事补出</td>
+<td>DOGE 及 FARTCOIN、PEPE / SHIB 相关市场、其他文化资产；Pump.fun 还需单独看发行交易产品</td>
+<td>共同符号、娱乐和传播确实可以产生需求，因此不能断言全部归零。但它们不会自然变成固定算力、稳定购买力或分红权；身份尚未锁定的同名币更不能进入生产支付流程。</td>
+</tr>
+</tbody></table>
+<p>这张表最强的结论是“持续工作比持续叙事更容易检验”，不是某个币永远领先。隐私需求会持续，但某个隐私协议仍要面对实现漏洞和密码学迁移；稳定计价需求会持续，但某个稳定币仍要兑现其抵押和退出机制；代理需求会扩大，也不代表每个代理币都能取得客户。<a href="/docs/coin-research-networks.html">逐币证据与反例</a>、<a href="/docs/coin-research-applications.html">业务失败条件</a></p>
+<p>对技术耐久性，我尤其看重四件事：规则能否由别人检查，维护者能否修复而不掩盖权限，费用能否支持真实成本，以及应用是否有离开补贴仍成立的用途。开源、形式化、抗量子和去中心化都应落实到具体覆盖面，不能只作形容词。</p>
+<h2>与 CINDER 最直接的比较对象</h2>
+<p>这部分决定我们该造什么。最初“没有任何项目把资源、微支付和验证放在一起”的笼统判断已经不够准确。以下方案实际覆盖了相当多的相邻工作。</p>
+<table>
+<thead>
+<tr>
+<th>对象</th>
+<th>已有的相关工作</th>
+<th>对 CINDER 提出的真实要求</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>OpenGradient / OPG</strong></td>
+<td>官方 SDK 将 Base 上 OPG 付款、x402 和 TEE 推理流程接起来，OpenGradient 网络承担节点注册和证明记录等职责。<a href="https://docs.opengradient.ai/developers/sdk/">SDK</a>、<a href="https://docs.opengradient.ai/learn/onchain_inference/verifiable_execution">执行流程</a></td>
+<td>“付费 AI + 可追溯记录”已经有具体竞争者。必须逐种服务比较证据：TEE 内直接执行与见证外部 API 不同；硬件、代码和认证根也有信任边界。我们尚不能用普通签名收据声称胜过其执行验证。</td>
+</tr>
+<tr>
+<td><strong>Venice / VVV、sVVV、DIEM</strong></td>
+<td>锁定 sVVV 可铸 DIEM，质押 DIEM 获取指定供应商按美元面额表达的每日 API 额度；基础币、锁仓凭证与服务额度彼此分开。<a href="https://venice.ai/faqs/all">当前 FAQ</a>、<a href="https://venice.ai/blog/introducing-diem-as-tokenized-intelligence-the-next-evolution-of-vvv">DIEM</a></td>
+<td>“币与资源使用权分离”不是我们的首创。DIEM 是供应商服务权益，不是现金或固定 FLOPs；CINDER 的有限 WORK 则是一次性、窄范围服务承诺。哈希示例远不能替代成熟模型 API，应先证明真正有价值的可交付资源。</td>
+</tr>
+<tr>
+<td><strong>Virtuals / VIRTUAL、ACP</strong></td>
+<td>ACP 组织客户、供应方和评估者，通过约定、托管、交付及评估处理代理服务；Agent 商业协调已有接口和协议实现。<a href="https://os.virtuals.io/acp/overview">ACP</a>、<a href="https://whitepaper.virtuals.io/about-virtuals/commerce-layer">商业层</a></td>
+<td>单有代理钱包和付款按钮不足以形成差异。我们要把预算、资源、交付、失败恢复和可重放证据做得可互操作；评估者认可与数学证明仍须分别标识。</td>
+</tr>
+<tr>
+<td><strong>x402</strong></td>
+<td>一种开放的 HTTP 付款协议，让客户端在请求流程内发现价格、授权付款并取得资源；它可以使用不同网络和支付方案，不是一枚专属币。<a href="https://x402.org/">标准</a>、<a href="https://docs.cdp.coinbase.com/x402/welcome">实施概览</a></td>
+<td>现有链和资产已经能做按请求支付。原生 CINDER 必须带来可测量的额外价值，且不能增加不必要的换币和接入步骤。HTTP 返回 402 不等于完整兼容某个 x402 版本；支付结算本身也不证明交付质量。</td>
+</tr>
+</tbody></table>
+<p>这些项目可以是竞争者，也可以成为未来的接口对象；本报告没有声称 CINDER 已与它们集成。更合理的差异化方向，是把<strong>有界授权、明确服务权益、支付与交付的状态一致、创作者分账以及可独立重放的证据</strong>放在同一套原生规则中，再逐项证明这样做比已有组合更好。抗量子签名是一项有价值的设计选择，不应独自承担整个商业论证。</p>
+<h2>当前 CINDER 已表达哪些规则，哪些仍不能宣称完成</h2>
+<p>这里按当前代码的实际路径描述，不沿用历史版本的功能清单，也不把源码存在当作本轮部署成功或独立审计通过。</p>
+<table>
+<thead>
+<tr>
+<th>当前实现范围</th>
+<th>能支持的陈述</th>
+<th>不能据此推出的陈述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>原生 <code>cinder-devnet-1</code> 账本</td>
+<td>CINDER 有自己的整数余额、有限创世储备、测试分配、交易 nonce、有效期、最大扣款上限和批量分账规则。<a href="https://github.com/ee777db/cinder-rail/blob/main/src/native-core.ts">账本规则</a></td>
+<td>不是某种稳定币余额改名；也还不是开放、独立验证者共同维护的主网。测试供应不构成未来主网分配承诺。</td>
+</tr>
+<tr>
+<td>ML-DSA-65 与 SHA-384</td>
+<td>账户授权和检查点使用标准化后量子签名原语，承诺绑定规范化数据。<a href="https://github.com/ee777db/cinder-rail/blob/main/src/native-crypto.ts">密码模块</a></td>
+<td>不代表浏览器、托管、TLS、管理权限、密钥恢复和软件供应链已全部抗量子，也不代表实现已独立审计。</td>
+</tr>
+<tr>
+<td>有限 WORK 与现货池</td>
+<td>WORK 库存、买入、转移、兑换消耗、LP 和 CINDER/WORK 交换有独立记账；池由实际转入的测试资产形成，并检查数量与滑点边界。<a href="/docs/economy-interface.html">经济接口</a>、<a href="https://github.com/ee777db/cinder-rail/blob/main/src/native-economy.ts">实现</a></td>
+<td>当前 WORK 只承诺有输入边界的 SHA-384 操作；不是 GPU、美元或通用 FLOPs 储备。存在池不等于有市场深度、公允价格或无常损失保障。</td>
+</tr>
+<tr>
+<td>计算预留与恢复</td>
+<td>普通计算订单预留资金，成功支付供应方，失败或超时退回服务预留额；代码接入确定性哈希和配置的 Llama 服务。<a href="https://github.com/ee777db/cinder-rail/blob/main/src/native-ledger.ts">执行与恢复</a></td>
+<td>不是所有费用一概退款；Llama 输出的签名和哈希仅提供出处及完整性，不证明指定权重正确执行，更不证明回答真实。</td>
+</tr>
+<tr>
+<td>预付计算通道</td>
+<td>独立会话钥匙只能消费指定通道额度；逐次授权进入日志，关闭或到期再结算，摊薄开闭账本费。<a href="/docs/channel-interface.html">通道接口</a></td>
+<td>当前通道只服务有界哈希；快速回执是抵押支持的临时确认，不是全网共识最终性。逐次签名、网络、存储与计算成本仍存在。</td>
+</tr>
+<tr>
+<td>音乐发布、付费访问与分账</td>
+<td>源码包含签名上传、内容哈希、发布、付费访问凭证和原子分账；公开账目与私有播放凭证分开。<a href="/docs/music-interface.html">音乐接口</a>、<a href="https://github.com/ee777db/cinder-rail/blob/main/src/native-media.ts">交付层</a></td>
+<td>付费访问不是已听完、真人唯一收听或版权鉴真；访问控制也不能阻止获授权用户复制音频。</td>
+</tr>
+<tr>
+<td>导出与独立重放工具</td>
+<td>工具按公开历史检查签名、金额流、状态转换以及通道日志；固定可信初始钥匙后，可核对所得历史是否遵守规则。<a href="https://github.com/ee777db/cinder-rail/blob/main/scripts/audit-native.mjs">重放入口</a></td>
+<td>重放正确不能证明运营者未向别人提供另一份历史，也不能让离线运营者继续交付；它与独立共识、防审查和数据可用性是不同工作。</td>
+</tr>
+</tbody></table>
+<p>哈希服务有意很窄，甚至客户端已能自己算出结果。因此它的现实用途是验证付款、交付和记账链路，不能被包装成新型高价值算力市场。真正昂贵的资源接入之前，应有明确模型或工作定义、数量、并发、有效期、可用性、失败处理和证据类别。</p>
+<p>原生币还存在一个不能靠措辞消除的关系：如果任务固定收取 <code>q</code> 个 CINDER，而外部单价是 <code>p(t)</code>，美元成本就是 <code>q × p(t)</code>。签名预算保证最多支付多少本币，不保证购买力稳定。WORK 的固定数量也不会让运营者的服务器成本消失。没有可靠外部报价和流动性，就不能给测试币标出虚构美元单价。</p>
+<p>可持续服务需要付费收入覆盖计算、网络、存储、验证、失败重试和运营准备。排放、质押、销毁及 AMM 改变分配与交易方式，不能制造物理资源。有限库存让承诺更容易计数，仍需要真实供应方履约。我们应先证明这个约束下仍有用户愿意使用，再讨论扩展和激励。</p>
+<h2>下一步建设的判断标准</h2>
+<p>最值得追求的不是一次宣布“所有问题解决”，而是一套每次扩大范围都能被他人推翻或确认的交付标准：</p>
+<ol>
+<li><strong>真实交付。</strong> 先让外部用户和供应方完成明确工作，量出正常、超时、重试、断连和退款的结果；将昂贵服务与哈希演示分开。</li>
+<li><strong>可核对的经济。</strong> 每份 CINDER、WORK、LP、预留额和创作者分账都能追溯；观察非补贴复购与服务成本，避免以自转交易量作为采用证据。</li>
+<li><strong>独立观察与共识分开。</strong> 先增加由不同主体运行、固定初始信任、保留完整历史的重放观察者，并能发现互相矛盾的检查点；这仍不是共识。随后才定义独立排序与验证的成员规则、故障模型、法定人数、数据可用性和恢复流程，并实施网络分区及恶意节点测试。</li>
+<li><strong>验证覆盖按服务增加。</strong> 对确定性工作独立重算；对采用 TEE 的工作校验实际证明链与工作测量；对适合 ZK 的窄任务规定精确关系。没有证据的调用应继续明确标注普通供应方声明。</li>
+<li><strong>为互操作证明原生币的必要性。</strong> 与 OPG、DIEM、ACP、x402 使用相同任务基线比较总摩擦和失败处理。若一个接口已有可靠标准，就先兼容；原生账本只承担它确实改善的资源和授权规则。</li>
+</ol>
+<p>这里的未来判断很明确：有持续需求的网络和产品会继续迭代，CINDER 不应假设它们停在过去；例如 Ethereum 已公开多层抗量子迁移目标，目标并不等于完成，却足以否定“只有新币能升级”的前提。<a href="https://blog.ethereum.org/2026/09/07/protocol-priorities">Ethereum 协议方向</a></p>
+<p>我们可以认真建设一枚原生币，同时要求它证明自己的存在理由。CINDER 值得继续的理由，应当是它让代理服务和创作者收入在明确预算、真实交付、可恢复失败和可核对账本之间形成更好的协作。这个目标比“时代唯一货币”更具体，也更严格：<strong>完成的工作能够被使用者接受，收取的钱能够被解释，失败能够被处理，规则能够被别人检查。</strong></p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

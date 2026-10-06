@@ -1,0 +1,49 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OPG、文化币与同名资产：先确认自己讨论的是什么 — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>OPG、文化币与同名资产：先确认自己讨论的是什么</h1>
+<p>研究口径：2026-10-05；名单中的重复项只计一次。价格、成交量和已实现回报不构成本表结论。这里分开解释资产的产品用途和价格叙事。</p>
+<table>
+<thead>
+<tr>
+<th>符号</th>
+<th>可以确认的对象与最佳用途</th>
+<th>底层约束；对 CINDER 的启示</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>OPG</td>
+<td>OpenGradient 的推理支付、节点经济和治理代币。官方 SDK 文档给出 Base 上的 OPG 地址 <code>0xFbC2051AE2265686a469421b2C5A2D5462FbF5eB</code>，介绍 x402、TEE 验证及批量哈希记录。适合需要可追溯 AI 调用的开发者。<a href="https://docs.opengradient.ai/developers/sdk/">SDK</a>、<a href="https://docs.opengradient.ai/learn/onchain_inference/verifiable_execution">执行流程</a></td>
+<td>这是 CINDER 的实际比较对象，不能把 OPG 误写成 Optimism OP。TEE 的可信边界取决于运行代码、硬件、认证根和模型究竟在 enclave 内还是经代理调用外部 API；代理请求见证不自动变成外部闭源模型每一步执行的数学证明。波动币付款也不天然产生稳定的美元成本。</td>
+</tr>
+<tr>
+<td>FARTCOIN</td>
+<td>若指 Solana 上 <code>9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump</code>，项目页将其定位为娱乐和社区文化代币。最佳用途是表达、收藏和自愿参与的文化交易。<a href="https://fart.dev/">项目页</a></td>
+<td>没有由页面建立的现金流、算力赎回或生产资源权利。文化价值可以持久，但不能据此承担代理预算单位；也不能推出价格必然归零。</td>
+</tr>
+<tr>
+<td>KPEPE / kPEPE</td>
+<td>这份交易符号语境下通常是 PEPE 的缩放市场标识。Hyperliquid 官方保证金文档确实列出 kPEPE 市场；它不是因为多了 k 就变成一条新链。<a href="https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers">市场定义</a></td>
+<td>使用者必须另核对交易场所的合约乘数、结算资产和现货地址。它主要承载 meme 价格敞口，不是计算或结算基础设施；合约交易也不等于持有现货币。</td>
+</tr>
+<tr>
+<td>KSHIB / kSHIB</td>
+<td>同样需区分 SHIB 现货与交易平台的 kSHIB 合约符号。SHIB 有社区和应用生态，但 Shibarium 官方网络参数将 gas 币明确列为 <strong>BONE</strong>。<a href="https://hyperliquid.gitbook.io/hyperliquid-docs/trading/margin-tiers">市场定义</a>、<a href="https://docs.shib.io/get-started/shibarium">Shibarium</a></td>
+<td>不能把 SHIB、BONE、交易合约和整个生态的收入权混成一个资产。最佳用途是对应的社区和交易场景，而非假定任何新应用都会强制购买 SHIB。</td>
+</tr>
+<tr>
+<td>USELESS</td>
+<td>同名资产非常多。若指主流名单中的 Solana meme，产品主题是对“无用”叙事的文化表达，而非资源赎回；其他链也有不同历史的 USELESS。网页和名字不能代替合约确认。<a href="https://www.uselesscoin.io/">Solana 项目页面候选</a>、<a href="https://www.uselesstoken.net/">另一项目的自述</a></td>
+<td>这里不把任何同名项目的承诺归给另一个合约。对生产支付排除，对文化存续不作确定的消亡判断。</td>
+</tr>
+<tr>
+<td>PONS</td>
+<td>若指 ponsfamily 文档中的 PONS，其 reference token 地址为 <code>0x39dBED3a2bd333467115dE45665cC57F813C4571</code>，位于 Robinhood Chain；pons 是以 WETH 为报价的发币和流动性平台，文档将 PONS 列为已毕业的参考资产。<a href="https://docs.ponsfamily.com/">官方文档</a></td>
+<td>平台有用不代表这枚参考资产持有人自动取得平台收入。不要与 PONZ、其他 Pons 协议或同名发行混淆。最佳场景是该平台的资产/社区活动，不能把它当跨行业结算基础。</td>
+</tr>
+<tr>
+<td>CASHCAT</td>
+<td>仅靠本次给出的符号不足以可靠锁定资产；已有多个同名/近名代币、工具和“CashCat Chain”页面，且页面区分 CASHCAT、CCC、CCBOT。未完成网络和合约对应前，不作确定技术归类。<a href="https://cashcatchain.cash/status">一个具体网络自述</a></td>
+<td>排除的是未核明资产的生产接入，而不是预言某个合约价格或寿命。任何涉及资金的系统都应要求 chain ID + 合约/原生资产 ID，不能按名字自动路由。</td>
+</tr>
+</tbody></table>
+<p>本表不会把文化需求视为不存在，也不会将所有交易量视为有效生产流量。Doge 可以因为文化、认知和支付集成持续存在；某个新 meme 也可能成为文化符号。两者都不能由“max flux”推出稳定购买力、可信交付或投资收益。</p>
+<p>对我们的接口而言，资产身份已经落实为网络标识和固定资产动作，而不是任意 ticker。CINDER 与 WORK 的状态分别记账；没有自动将任何同名外部资产映射成本网络余额。</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

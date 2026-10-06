@@ -1,58 +1,89 @@
 # Security model and operational boundaries
 
-Version 0.1 · 5 September 2026
+Version 0.2 · 5 October 2026
 
-Cinder Rail 0.1 is a public sandbox. Its nonredeemable credits isolate the demo from customer funds while exposing the actual authorization and receipt mechanics. The code and contracts have not received an independent security audit. Reference contracts are not an invitation to deposit assets.
+CINDER 0.2 is a native development network with test balances, cryptographic authorizations and publicly replayable accounting. A single operator hosts, sequences and signs its history. It has not received an independent security audit. No dollar peg, open validator consensus, complete quantum-safe infrastructure or correct-LLM-execution proof is represented.
 
-## Assets, actors and trust
+## Trust and assets
 
-The sandbox protects the integrity of per-session authorizations, spending totals and receipts, plus the operator's finite compute allowance. Its adversaries include callers with malformed requests, stolen session capabilities, replayed signatures, competing concurrent requests, and clients attempting to exhaust free resources.
+The native system protects authorization, exact balances, resource inventory, royalties, bounded session allowances and recorded receipt integrity against malformed or repeated client requests. The operator controls deployed code, durable storage, issuer keys, transaction ordering, admission and availability. Cloudflare operates hosting, storage, administration and inference infrastructure. A valid signature attributes a statement to its key; it does not prevent that key's owner from making a false statement or signing conflicting histories.
 
-The operator controls deployment, accounting and the issuer private key. Cloudflare operates the hosting, durable storage and inference infrastructure. A valid operator signature does not protect a client against an operator willing to lie about execution. A browser compromise can use any key accessible to the page; an export restriction does not stop malicious code from invoking the key.
+Clients hold ML-DSA-65 wallet keys. Address derivation binds the public key to a `cin1` SHA-384 address. Independent replay verifies this binding rather than trusting a public-key map supplied by the operator. Session keys can spend their channel's reserved budget. Media playback tokens grant temporary access to one audio file. Neither kind of capability should be exposed.
 
-## Implemented application controls
+## Cryptographic scope
 
-The service validates supported P-256 public keys and rejects submitted private-key material. A quote binds a random identifier and nonce, session, service, input hash, fixed charge, cumulative spend and expiry. A caller must sign the server's canonical quote. Input substitution, signature mismatch, expired authorizations and stale cumulative totals are rejected.
+Native account, transaction and checkpoint signatures use standardized ML-DSA-65 with an application context and explicit network/domain fields. Commitments use SHA-384. Canonical JSON rejects ambiguous encodings, unsafe numbers, malformed Unicode, extra fields and overlarge inputs; native amounts use canonical integer strings. Selected independent NIST ACVP vectors supplement protocol tests.
 
-The session ledger reserves credits before compute and records a completed result before successful delivery. Repeating a successfully completed signed request returns the existing result rather than charging again. Detected compute failures restore the reservation. One active operation per session bounds concurrency and simplifies accounting. A reservation that remains pending for two minutes is recovered through an alarm or subsequent request: its test charge is refunded and its quote cannot run again. An upstream service might still have executed; this is not exactly-once execution across an arbitrary provider.
+The implementation imports `@noble/post-quantum` 0.7.1 and `@noble/hashes` 2.4.0. The upstream JavaScript ML-DSA implementation is not independently audited and does not promise constant-time execution. Primitive choice does not make the browser, supply chain, TLS, deployment account, storage, key recovery or consensus automatically resistant to quantum attackers. Conventional elliptic-curve signatures remain in the separate legacy `/compute` sandbox and Solidity reference integrations.
 
-The gateway bounds JSON request bodies, input sizes and output length, checks browser origins on writes, and sends restrictive security headers. It does not fetch arbitrary user-supplied URLs. Operator-configured daily session, request, compute and inference limits bound intended sandbox activity. Per-IP request controls also apply to session reads and limit one caller's ability to exhaust the shared allowance. IP-based controls are an abuse signal, not personhood. Limits may reject legitimate users sharing a network or during a traffic spike.
+There is no multisignature operator custody, independent timestamp service, public consensus finality, validator slashing or client-enforced availability proof. The issuer private key lives in the native Durable Object's storage. Account administration and deployment permissions are therefore part of the signing boundary. Preserving this storage preserves identity; replacing the key without a migration breaks existing pins. A production rotation, compromise and recovery system has not been delivered.
 
-The deployed values in the configuration are the authority for quotas. Quotas limit application calls, not every possible hosting bill; malicious traffic, platform charges and upstream behavior still need observation. Never describe a request quota as a provider-enforced dollar spending cap.
+## Transaction and accounting controls
 
-## Data handling
+Every ordinary native transaction binds its sender, next nonce, network, actions, maximum gross CINDER debit and short expiry. Signature verification precedes acceptance and authenticates exact successful replays. State transitions, native account postings, application state, transaction receipt and checkpoint are committed in one serialized durable write. Failed validation does not partially debit an account.
 
-Prompts are sent to the configured compute provider for inference. The application retains quote metadata and input digests, and stores outputs with receipts so a retry can return the original result. Hashing is not encryption: a short or predictable input can sometimes be guessed from its digest.
+The supply begins at a finite genesis reserve. A faucet transfers from that reserve; it cannot mint above it. Signed split recipients receive exact integer allocations using the largest-remainder rule. Independent replay checks semantic transitions and resource/LP accounting in addition to zero-sum native postings. A zero-sum receipt by itself is insufficient evidence of authorized balances.
 
-The public session identifier and the secret session capability are separate. Reading session state or requesting an unsigned quote requires the `X-Cinder-Session` header containing the session token. A receipt can include its session identifier without revealing that token. The token remains sensitive: it can reveal retained session results and permits quote requests, although it cannot sign spending authorizations. Do not export or publish it. Receipt and output contents themselves may still be sensitive, so the demo should be used with nonsensitive sample text.
+Concurrent transactions from the same wallet need client-side serialization. When delivery is uncertain, retain and retry the identical signed envelope. Creating a new transfer merely because its response was lost can authorize a second payment. An expired previously committed envelope can return its saved result; it cannot create a new state transition.
 
-The session lifetime is 24 hours, with scheduled deletion of session storage. Deletion is an application-level retention policy, not a guarantee about every infrastructure backup or upstream provider log. The rate-limiting control stores a daily salted hash derived from a connection IP, not a global permanent identity. Hosting providers still handle normal connection information.
+SDK submission checks also enforce the signed gross debit cap; a compensating credit cannot hide an excessive debit. Compute job verification authenticates the original reservation receipt, payer public-key/address binding and authorization, then checks settlement domain, network, request, service, model, output, refund and payment destination. `complete` and `failed` require a valid settlement receipt. Unknown status/domain and inconsistent unsigned wrapper fields fail closed. Checking one request and settlement does not reconstruct historical account balances; the independent replay tool serves that purpose.
 
-The issuer private key is stored in the provider control object's storage in this version. Cloudflare access and deployment permissions are therefore part of the key-security boundary. A funded release needs a documented rotation and compromise process, retained historic public keys, restricted signing authority, and an assessed key-management solution. No independent time-stamping or public append-only receipt log exists here.
+## Computation and channel failure handling
 
-## Important failure semantics
+Ordinary compute first reserves the resource principal in an escrow account. Completion pays the provider; handled failure or the two-minute lease expiry refunds principal, retaining the network fee. Recovery is armed before reservation commit and settlement is atomic. Upstream execution may have occurred even if the response was lost. CINDER does not claim exactly-once execution across Cloudflare or arbitrary external services.
 
-| Failure | Required interpretation |
-| --- | --- |
-| Browser loses the response after success | Retry the same signed quote to retrieve its result while the session remains available |
-| Compute reports an error | No successful receipt; reservation is refunded by the handled failure path |
-| Worker terminates during upstream compute | Execution may have occurred without a delivered result; observe recovery state, never claim universal exactly-once service |
-| Public issuer key changes | Verify against a previously trusted key; investigate rotation rather than automatically trusting a new history |
-| Provider reports a model name | Treat it as a provider assertion unless independently accepted execution evidence accompanies it |
-| Session expires | Test credits and stored results are ephemeral; retain exported evidence when needed |
-| Receipt signature verifies | Content is attributable to the pinned signing key; model correctness and answer quality remain separate |
+Channel openings reserve a finite native allowance and install a distinct session key, service, fixed rate, capacity and expiry. Calls require the next sequence and a signature binding the exact input hash. The call journal and updated consumption commit together. Exact authenticated retries return saved results; substituted inputs, invalid signatures, wrong networks or conflicting sequence reuse fail. A new valid randomized signature over the same message may retrieve the original record and its original signature. The full native deposit remains in escrow until close, making all balance movements replayable from checkpoints.
 
-## Requirements before customer funds
+The SDK recovers and validates immutable terms from the signed opening, then checks returned authorization, journal metadata, output, amounts and channel accounting. Sequence one binds to journal genesis; later records bind to a provided or cached predecessor. A fresh client checking a later call without its prior history cannot prove that missing history, or that an unsigned provisional acknowledgment will survive operator equivocation. Closing checkpoints and full journal replay remain necessary.
 
-1. Independently review contract authorization, cumulative settlement, refund races, timeout behavior and token-transfer handling. Resolve critical and high-severity findings.
-2. Demonstrate conservation of funds, no duplicate claims, domain-bound signatures and safe exits through stateful property tests and adversarial integration tests.
-3. Prove funded-deposit detection, chain reorganization handling, finality policy, RPC failure behavior and facilitator settlement reconciliation on testnet.
-4. Separate provider accounting from the on-chain money path; define liability for paid-but-undelivered work and a bounded refund process.
-5. Set capped pilot exposure, signer revocation, operational alerts, recovery procedures and an accountable on-call owner.
-6. Define supported jurisdictions, service terms, privacy handling and the legal responsibilities of the chosen business and settlement arrangement with appropriate specialists.
+Uncertain channel openings keep the original authorization and session secret in the same SDK instance; concurrent identical openings share the operation. Errors expose a public transaction hash, not the key. This avoids a second reservation on an ordinary retry, but does not survive process loss. Persist channel secrets deliberately and retain uncertain signed authorizations. Session-key loss does not block the account owner from closing or the host from processing expiry.
 
-These are release requirements, not claims that a token or payment service becomes lawful or secure by passing a generic checklist. The precise operating model determines the analysis. A centralized ledger with a USDC label is not an audited escrow.
+Owner close or automatic expiry pays consumed calls and refunds unconsumed collateral once. Expiry can close without a wallet signature or liquid balance for a fee. The host must still be available to process it. A session-key compromise can spend all remaining capacity but cannot access the owner's other balances. The service is currently deterministic hashing; channel receipts are not proofs of useful inference.
+
+## Music and media access
+
+Publication binds an uploaded file's complete SHA-384 digest, declared media type, price and immutable recipient shares. Chunks are individually signed and ordered; final digest verification precedes publication. The implementation bounds file size, upload count, publication count and supported audio types. An uploader's rights declaration is not copyright verification, content moderation or proof that the uploader created the work.
+
+Paid access posts royalties atomically and deduplicates payer/listen identifiers. It is not proof of a unique human listener, attention, playback duration or an organic audience. The protocol pays no farming reward for self-listening or trading. Applications must not interpret purchased accesses as fraud-resistant advertising impressions.
+
+Public payment signatures are replayable evidence. They cannot be used to retrieve a playback secret: `/music/access` requires a separately signed fresh private request from the payer. Public `/submit` replays and exported receipts contain no playback token. That separation is covered by regression tests. The returned one-hour token is a bearer capability and must stay private; query-string URLs can still leak through application logs, copied links or a compromised device. Token expiry does not delete copies of audio already downloaded.
+
+When `listen()` has paid but the private access request fails, the same SDK instance retains that payment and retries access without another debit. Uncertain payment delivery retains the original signed envelope. Its error includes `pendingTransactionHash`, `listenId`, `authorization` and, when available, the paid receipt, allowing an application to reconcile after saving those records. Recreating the client, generating another listen identifier or losing recovery state is not an idempotent retry. The separate short-lived playback proof has a nonce but no consumed-nonce store; it can retrieve the same token again during its validity window and should not be published.
+
+Unpublishing removes a track from new purchases. Its metadata, past allocations, audio storage and already-paid unexpired access remain. There is no automated rights dispute court, geographically tailored licensing system or verified per-human streaming meter.
+
+## Resource market
+
+WORK inventory is finite and tracks purchases, transfers, pool reserves and consumed units. Redemption validates and computes the deterministic operation before committing the burn. WORK represents this operator's bounded service promise; it is not audited physical backing or assured service beyond the devnet's lifetime and availability.
+
+The one CINDER/WORK constant-product pool uses actual deposited balances, signed deadlines, positive slippage minima and deterministic rounding. The protocol prevents accounting overdraw and unauthorized swaps; it does not prevent market-price loss, operator ordering advantages, toxic flow or temporary lack of liquidity. There are no margin positions, liquidations, external price oracles, bridges or perpetual markets in this implementation.
+
+## Wallet and browser boundary
+
+The browser keeps private keys in memory. Its optional wallet backup uses AES-256-GCM, PBKDF2-SHA-384 with 310,000 iterations, a random salt, a fresh IV and authenticated format metadata. Restore checks the expected network and verifies that private and public keys match. Password and ciphertext length bounds limit malformed imports. Password quality still determines resistance to offline guessing; the backup cannot be restored without the password.
+
+No seed phrase service, password-reset server, hardware-backed signer, social recovery or biometric account recovery is implemented. A compromised page or browser can use a key available in memory. Security headers reduce some browser attack surfaces but do not secure an already compromised deployment. JavaScript cannot guarantee that every copy of sensitive material has been erased from memory.
+
+## Operational bounds
+
+Native requests have a 48,000-byte JSON limit. Native writes are signature-authorized and do not rely on cookies. Quotas use daily salted IP hashes, which are an abuse signal rather than a permanent identity or Sybil defense. Current global/native limits include 30 daily inference attempts, 10,000 ordinary writes, 500 registrations and 500,000 channel calls; per-IP and read/upload limits also apply. These differ from the legacy sandbox configuration.
+
+Lifetime native bounds include 5,000 accounts, **10,000 checkpoints**, 200 audio uploads, 200 publications and ten uploads/publications per owner. New ordinary work stops once the existing height reaches **9,900**, leaving 100 entries for completion and recovery. Owner-authorized channel close is an explicit exception to that ordinary cutoff; both it and expiry can use the reserved headroom while still obeying the total limit.
+
+The host limits channel journals to **100,000 lifetime accepted-plus-reserved calls**. Openings reserve all requested slots; each accepted call changes a reserved slot into an accepted record; owner or expiry close releases unused slots. Replays do not consume another slot, and accepted history never becomes reusable budget. Counters update atomically with the corresponding channel operation. `/info.limits` publishes the current budget. Daily limits count attempts/retries and do not override this smaller lifetime storage cap.
+
+The finite test network can fill. Service availability and indefinite redemption are not promised by a fixed-size development ledger. Request quotas do not constitute an account-wide provider billing cap.
+
+History export and channel journals have a separate daily read allowance of 20,000 per IP and 100,000 globally, so ordinary reads cannot directly exhaust that audit budget. Admission still shares the finite visitor map and hosting platform; this separation is not an availability guarantee.
+
+See [privacy](privacy.md) for native public retention and the distinct 24-hour legacy session policy. Public source and test results aid review; they do not substitute for independent assessment or establish that no vulnerabilities remain.
+
+## Public evidence and its scope
+
+The [deployed application report](https://cinder-rail.ee777db.workers.dev/examples/native-apps-public.json) records ten exercised stages across signed uploads, paid access and exact royalties, duplicate rejection, user-funded liquidity, swap, resource redemption, LP withdrawal and unpublication. The [public channel report](https://cinder-rail.ee777db.workers.dev/examples/native-channel-public.json) records 100 calls, median 353.3 ms and p95 519.7 ms, with later opening/closing checkpoints. These are recorded integration observations, not a security audit or distributed-finality benchmark.
+
+The [live inference receipt](https://cinder-rail.ee777db.workers.dev/examples/native-live-inference.json) establishes one attributed provider response and native settlement, not correct model execution or a factual answer. The [network snapshot](https://cinder-rail.ee777db.workers.dev/examples/native-network.json) carries the signed genesis and operator key; the [music demonstration](https://cinder-rail.ee777db.workers.dev/examples/native-demo.json) identifies original synthesized audio and demonstration-operated recipient wallets. Neither constitutes independent adoption or a separate trust authority.
 
 ## Reporting
 
-Use the source repository's private vulnerability reporting channel if enabled. Otherwise contact the repository owner privately before publishing exploit details. Public issues are appropriate for non-sensitive documentation or integration bugs. No guaranteed response time, paid bounty or independent audit is represented by this document.
+Use the repository's private vulnerability-reporting channel if enabled. Otherwise use an existing private contact channel for the repository owner rather than posting an active exploit or secret publicly. Non-sensitive bugs can be reported in [GitHub issues](https://github.com/ee777db/cinder-rail/issues). No response-time guarantee, paid bounty or completed external audit is represented.

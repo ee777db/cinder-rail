@@ -1,0 +1,234 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Implementation and completion evidence — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>Implementation and completion evidence</h1>
+<p>Version 0.2 deployed native testnet · 5 October 2026</p>
+<p>CINDER is running at <a href="https://cinder-rail.ee777db.workers.dev">cinder-rail.ee777db.workers.dev</a>. Actual public transfers, audio upload and paid access, creator splits, resource redemption, spot trades, channel settlement and one real Meta Llama request have completed. This is a deployed native testnet, not a whitepaper-only or credit-only demonstration.</p>
+<p>The broader acceptance condition is <strong>not fully satisfied</strong>. The deployed network uses one operator, test assets and bounded services. It does not yet provide independent consensus, a dollar-stability mechanism, proof of correct LLM inference, the requested perpetual exchange or established agent adoption. The matrix below makes that distinction explicit.</p>
+<p>A verified Cloudflare deployment was <code>bcf7f445-fde1-4de0-8599-77c8d10e6f40</code>; later deployments may supersede that application version while retaining its native identity and history. The <a href="/examples/native-network.json">public identity record</a> records the chain ID, signed genesis, genesis hash, operator public key and observation time. Reports below identify their actual network and time. They are snapshots, not a hard-coded claim about the network&#39;s current head.</p>
+<h2>Verified implementation and public flows</h2>
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Observed result</th>
+<th>Evidence and scope</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Complete automated suite</td>
+<td>192/192 passed</td>
+<td>Native cryptography, account/application transitions, failure recovery, channel limits, wallet vault, semantic replay, legacy protocol and reference contract checks</td>
+</tr>
+<tr>
+<td>Type checking</td>
+<td>Main project and browser/SDK checks passed</td>
+<td>Source interfaces and DOM usage</td>
+</tr>
+<tr>
+<td>Public native smoke</td>
+<td>11 stages, 102 HTTP requests, eight new checkpoints</td>
+<td>Actual native transfers, authorization/replay checks, computation and one bounded external Meta Llama request</td>
+</tr>
+<tr>
+<td>Public application smoke</td>
+<td>10 stages, 11 transactions</td>
+<td><a href="/examples/native-apps-public.json">Report</a>: original audio upload, full/byte-range delivery, 71/30 royalty allocation from 101 atoms, duplicate rejection, WORK redemption, funded liquidity, slippage limits and withdrawal</td>
+</tr>
+<tr>
+<td>Live inference</td>
+<td>One real Meta Llama provider request completed and settled</td>
+<td><a href="/examples/native-live-inference.json">Signed request and result</a>; establishes provenance and delivery, not correct model execution or answer quality</td>
+</tr>
+<tr>
+<td>Public semantic ledger replay</td>
+<td>Passed through the complete observed head recorded in the report</td>
+<td><a href="/examples/native-audit-public.json">Current saved audit snapshot</a> includes checkpoint/signature counts, genesis identity and head hash; later transactions require a fresh replay</td>
+</tr>
+<tr>
+<td>Local semantic ledger replay</td>
+<td>43 checkpoints and 10,085 signatures verified</td>
+<td><a href="/examples/native-audit-local.json">Local report</a>; includes the 10,000-call authorization journal</td>
+</tr>
+<tr>
+<td>Local browser market</td>
+<td>Actual purchase, swap, liquidity addition/removal and redemption verified</td>
+<td>Browser UI and signed local transactions</td>
+</tr>
+<tr>
+<td>Public browser paid access</td>
+<td>Original 12-second demo became playable; media ready state 4 and no media error</td>
+<td><a href="https://cinder-rail.ee777db.workers.dev/explorer?tx=9c190bdc3642c58be9e24ac08468d764461d004486132dbec3f2aa426bd753e3b0ebbbb5072bb82c6a0db934404b40d7">Paid-access receipt</a>, recorded at checkpoint 30; this is a paid access event, not proof of a unique human listening</td>
+</tr>
+<tr>
+<td>Public explorer</td>
+<td>Live checkpoint pagination, receipt lookup, local ML-DSA checks and JSON download</td>
+<td><a href="https://cinder-rail.ee777db.workers.dev/explorer">Explorer</a>; first-observed operator trust is disclosed and distinct from independent consensus</td>
+</tr>
+<tr>
+<td>Public research</td>
+<td>Chinese analysis of all 48 requested ticker identities with sources</td>
+<td><a href="https://cinder-rail.ee777db.workers.dev/research">Research</a>; ambiguous symbols are labeled rather than silently assigned</td>
+</tr>
+</tbody></table>
+<p>The <a href="/examples/native-demo.json">public demonstration manifest</a> identifies <strong>First Light · Cinder demo</strong>, a 12-second original synthesized recording with 70/20/10 recipient shares. All three recipient wallets are controlled by the demonstration. The seed script bought WORK from actual test balances and deposited <strong>2 CINDER plus 20,000 WORK</strong> into a previously empty pool. These are funded test reserves; they are not independent artists, outside adoption, a fiat price or evidence of organic market demand. Pool reserves can change after that initial deposit.</p>
+<h2>Measured channel performance</h2>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th align="right">Localhost</th>
+<th align="right">Public endpoint, sequential client</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Accepted calls</td>
+<td align="right">10,000</td>
+<td align="right">100</td>
+</tr>
+<tr>
+<td>Total elapsed time</td>
+<td align="right">169,244 ms</td>
+<td align="right">38,819 ms</td>
+</tr>
+<tr>
+<td>Calls/second</td>
+<td align="right">59.09</td>
+<td align="right">2.58</td>
+</tr>
+<tr>
+<td>Median end-to-end call</td>
+<td align="right">14.87 ms</td>
+<td align="right">353.3 ms</td>
+</tr>
+<tr>
+<td>p95 end-to-end call</td>
+<td align="right">30.19 ms</td>
+<td align="right">519.7 ms</td>
+</tr>
+<tr>
+<td>Opening + closing checkpoints</td>
+<td align="right">2</td>
+<td align="right">2</td>
+</tr>
+<tr>
+<td>Total opening + owner-close network fee</td>
+<td align="right">24 atoms</td>
+<td align="right">24 atoms</td>
+</tr>
+<tr>
+<td>Resource entitlement consumed per call</td>
+<td align="right">100 atoms</td>
+<td align="right">100 atoms</td>
+</tr>
+<tr>
+<td>Network fee averaged per accepted call</td>
+<td align="right">0.0024 atoms</td>
+<td align="right">0.24 atoms</td>
+</tr>
+</tbody></table>
+<p>Sources: <a href="/examples/native-channel-local.json">local 10,000-call report</a>, <a href="/examples/native-channel-public.json">public 100-call report</a>. Both include client signing and verification. UTC report timestamps fall on 6 October; the local release date is 5 October in America/New_York.</p>
+<p>Intermediate channel responses are provisional operator acknowledgments against a prefunded allowance. Native balances settle only at a closing checkpoint. Neither sample measures independent validator finality or dollar-denominated fees. The slower public sequential result is included rather than substituting localhost timing for public latency. It does not establish 10,000 calls/hour on the public service, and it is not a universal throughput ceiling. The completed four-channel <a href="/examples/native-throughput-public.json">1,000-call public run</a> accepted and settled every call: 511.553 seconds for the call window, <strong>1.954832 verified calls/second</strong>, 1,506.197 ms median and 3,913.196 ms p95. Setup took 5.023 seconds and cleanup 5.258 seconds; total elapsed was 521.835 seconds. One exact retry produced 1,001 network attempts, with no duplicate charge. Eight open/close checkpoints charged 96 network atoms; resource settlement was 100,000 atoms. These Internet measurements include the client&#39;s configured HTTPS proxy. Concurrency did not improve observed throughput; this run falls below 10,000 calls/hour (2.778 calls/second), and no cause or production ceiling is inferred from this one route.</p>
+<h2>Capability and acceptance matrix</h2>
+<table>
+<thead>
+<tr>
+<th>Requested capability</th>
+<th>Implemented and verified now</th>
+<th>Remaining boundary</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Own coin and accounting</td>
+<td>Public <code>cinder-devnet-1/native</code>, six decimals, finite genesis reserve, signed transfers and supply replay</td>
+<td>Test asset; no mainnet issuance/distribution, cash redemption or external monetary value</td>
+</tr>
+<tr>
+<td>Lightweight high-frequency payment</td>
+<td>Prefunded session channels, scoped keys, public journals, native closing settlement, local 10,000-call, public 100-call and four-channel 1,000-call samples</td>
+<td>One operator and bounded hash workload; sustained public 10,000 calls/hour and decentralized finality are not established</td>
+</tr>
+<tr>
+<td>Sub-cent cost and negligible fees</td>
+<td>Exact native accounting; 24 network-fee atoms across each measured open/close pair</td>
+<td>No fiat exchange rate, demonstrated dollar sub-cent cost, zero transport-cost claim or provider-cost benchmark</td>
+</tr>
+<tr>
+<td>Resource price stability</td>
+<td>Finite WORK inventory, specified operation per unit, deterministic burn/redemption</td>
+<td>Operator capacity promise; no dollar peg, audited physical backing, general GPU/LLM entitlement or assured indefinite service</td>
+</tr>
+<tr>
+<td>Post-quantum foundation</td>
+<td>ML-DSA-65 native signatures, SHA-384 commitments, selected NIST vectors</td>
+<td>Hosting, administration, recovery and the JavaScript implementation are not end-to-end independently audited PQ infrastructure</td>
+</tr>
+<tr>
+<td>Nonpunitive circulation</td>
+<td>Service payments, resource consumption and LP fees from actual trades; no holding tax or wash-volume mining</td>
+<td>No demonstrated mature economy or sustainable demand; trading fees do not guarantee LP return</td>
+</tr>
+<tr>
+<td>Music upload → payment → access → royalties</td>
+<td>Public original upload, hash commitment, immutable splits, paid media delivery, browser playback and exact allocations</td>
+<td>No rights adjudication, proof of human attention, advertising meter or integration with the user&#39;s separate music site</td>
+</tr>
+<tr>
+<td>Native trading pair</td>
+<td>Public CINDER/WORK funded spot pool, LP shares, deposits, swaps and withdrawals</td>
+<td>No perpetual exchange, orderbook, margin, liquidations, bridges, other-chain assets or external listing</td>
+</tr>
+<tr>
+<td>Agent identity</td>
+<td>ML-DSA account authorization and bounded channel session keys</td>
+<td>Key identity is not human identity or proof that a claimed model executed</td>
+</tr>
+<tr>
+<td>Verifiable inference</td>
+<td>Actual bounded Llama response, signed attribution and native settlement; reproducible hash execution</td>
+<td>No ZKML proof, validated TEE attestation or proof of correct LLM execution</td>
+</tr>
+<tr>
+<td>Network consensus</td>
+<td>Serialized durable state, signed hash-linked checkpoints and public semantic replay</td>
+<td>No deployed independent validators, BFT finality or permissionless self-hosted shared network</td>
+</tr>
+<tr>
+<td>Wallet usability</td>
+<td>Browser creation, local encrypted backup/restore, native SDK</td>
+<td>No social recovery, passkey/hardware signer, password reset or universal wallet interoperability</td>
+</tr>
+<tr>
+<td>Whitepaper and documentation</td>
+<td>Public protocol, interfaces, developer/security/privacy material and sourced comparative research</td>
+<td>Describing a missing mechanism does not make it implemented</td>
+</tr>
+<tr>
+<td>Deployment and discoverability</td>
+<td>Live native testnet, website, explorer, API discovery and dated verification reports</td>
+<td>A versioned GitHub release or external social announcement is a separate publication action, not inferred from deployment</td>
+</tr>
+<tr>
+<td>Adoption</td>
+<td>Working public demo and integration examples</td>
+<td>Operator-owned demo wallets and seeded reserves are not outside users, artists, partners, independent liquidity or agent preference</td>
+</tr>
+</tbody></table>
+<h2>Reproduce</h2>
+<pre><code class="language-sh">npm ci
+node scripts/build-native.mjs
+node scripts/build-docs.mjs
+npm run dev
+</code></pre>
+<p>With the local server running:</p>
+<pre><code class="language-sh">npm test
+npm run check
+CINDER_URL=http://127.0.0.1:8787 node scripts/native-smoke.mjs
+CINDER_URL=http://127.0.0.1:8787 node scripts/native-apps-smoke.mjs
+CINDER_URL=http://127.0.0.1:8787 CINDER_CALLS=10000 node scripts/native-channel-smoke.mjs
+CINDER_URL=http://127.0.0.1:8787 node scripts/audit-native.mjs
+npm run build
+</code></pre>
+<p>For read-only replay of the deployed testnet, run:</p>
+<pre><code class="language-sh">CINDER_URL=https://cinder-rail.ee777db.workers.dev node scripts/audit-native.mjs
+</code></pre>
+<p>Use <code>CINDER_OPERATOR_KEY</code> to supply a previously trusted public key. The audit script otherwise observes the endpoint&#39;s current identity. HTTP smoke and application tests mutate finite test state and consume quotas. <code>CINDER_TEST_AI=1</code> explicitly adds a bounded external inference call. Preserve reports with their environment, timestamp and operator identity; a local pass must not be relabeled a public pass.</p>
+<p>Only native test assets were transferred. No sale was performed, and the development supply assigns no future token entitlement. The deployed implementation is real; the unfulfilled economic, consensus and adoption requirements remain unfulfilled.</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

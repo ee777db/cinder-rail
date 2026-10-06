@@ -1,77 +1,89 @@
-# Cinder Rail
+# CINDER
 
-**Give machines a budget. Get a receipt for the work.**
+**让机器付工作的钱，让创作者收到每一次付费访问的钱。**
 
-Cinder Rail is an experimental, runnable machine-to-machine compute service. A client receives an HTTP 402 quote, checks its spending limit, signs with an ephemeral P-256 agent key, executes a bounded computation, and verifies the provider's signed receipt independently.
+CINDER is a self-issued native test currency for machine work, paid music access and resource exchange. The implementation has ML-DSA-65 account signatures, exact integer accounting, bounded compute channels, an audio publication/payment flow and a CINDER/WORK spot market. It uses Cloudflare Workers and a SQLite-backed Durable Object; no GPT Sites or OpenAI inference service is involved.
 
-The current application supports deterministic SHA-256 computation and short Meta Llama responses through Cloudflare Workers AI. It uses no OpenAI inference service, GPT Sites, speculative token or customer funds.
+This repository contains the **0.2 deployed native testnet**. Public native transfers, music access, resource trading, bounded channels and one real Meta Llama inference have been verified. The complete automated suite passes 192 tests, with main-project and browser/SDK type checks passing. Deployment evidence is recorded in [the completion report](docs/completion-gate.md). CINDER and WORK are test assets without cash redemption or a claimed dollar price. The operator sequences and stores this network. Independent validator consensus is not deployed.
 
-> **Public sandbox.** Credits are nontransferable, nonredeemable test units. This release implements `cinder-sandbox-v1`, not x402 wire compatibility. A signed receipt establishes issuer provenance and content integrity; it does not establish LLM execution correctness. Solidity contracts are separately tested reference implementations, not audited or deployed financial infrastructure.
+## Use it
 
-## Try it
+The project address is [cinder-rail.ee777db.workers.dev](https://cinder-rail.ee777db.workers.dev). The native interface lets you create a wallet, receive test CINDER from the finite reserve, send it, publish your own audio with recipient splits, pay for access, buy/redeem WORK and exchange CINDER/WORK. Private wallet keys stay in browser memory; an encrypted backup can be downloaded and restored. Losing the key and backup loses access. No password reset or social recovery service exists.
 
-Open the [live console](https://cinder-rail.ee777db.workers.dev), choose a service, inspect the spending limit and run it. Export a receipt to check outside the browser. No wallet or login is required. Agent signing keys are held in browser memory only.
+The catalog includes **First Light**, an original 12-second synthesized demonstration. Its three recipient wallets are operated by the demo, with a 70/20/10 split. The initial spot pool was funded with 2 test CINDER and 20,000 WORK purchased from actual test balances. This is transparent demonstration inventory, not outside artist adoption or independent market liquidity. [Public demo manifest](public/examples/native-demo.json).
 
-A programmable client is included:
+For agents, [the native developer guide](docs/developers-native.md) includes runnable SDK examples, bounded session keys, safe retries, media access and ledger verification. Native API discovery begins at `/api/native/info` and `/api/native/genesis`.
 
-```sh
-CINDER_URL=https://cinder-rail.ee777db.workers.dev node scripts/agent.mjs \
-  --service hash --input 'Machines need budgets.' --budget 10 --out receipt.json
-node scripts/verify-receipt.mjs receipt.json
-```
+## What the two assets do
 
-For inference, use `--service inference --budget 500`. Prices and balances above are test micro-units, not actual charges. To establish issuer trust, download `/api/key` separately and pass the saved key JSON as the verifier's second argument.
+| Asset | Actual implementation | Boundary |
+| --- | --- | --- |
+| CINDER | Native transferable six-decimal balance; pays network fees, compute, creator splits and spot trades | Finite test genesis of 1,000,000 CINDER. No mainnet allocation, sale, market-price or redemption promise |
+| WORK | Native transferable integer entitlement; consuming one unit executes a bounded SHA-384 text operation | Finite 1,000,000-unit inventory promised by this operator. It is neither dollars nor a general LLM/GPU credit |
 
-## Run locally
+WORK separates a specified service entitlement from the currency used to acquire it. Buying 100 WORK gives 100 specified operations under the testnet's availability and capacity limits; it does not freeze the future dollar cost of acquiring CINDER. The current hash workload tests the payment machinery and is independently reproducible; it is not a new inference-verification invention or a commercially valuable AI service.
+
+## Run and verify locally
 
 Requires Node.js 22.18+ and npm. Dependencies are locked in `package-lock.json`.
 
 ```sh
 npm ci
+node scripts/build-native.mjs
+node scripts/build-docs.mjs
 npm run dev
 ```
 
-Open `http://localhost:8787`. Hash compute works locally. Workers AI requires an authenticated Cloudflare account; provider failures return reserved test credits.
+Open `http://127.0.0.1:8787`. Deterministic computation, audio and the native market work locally. Cloudflare Workers AI is required for Meta Llama inference.
+
+In another terminal:
 
 ```sh
 npm test
 npm run check
-npm run test:contracts
-npm run test:e2e
+CINDER_URL=http://127.0.0.1:8787 node scripts/native-smoke.mjs
+CINDER_URL=http://127.0.0.1:8787 npm run test:apps
+CINDER_URL=http://127.0.0.1:8787 CINDER_CALLS=100 node scripts/native-channel-smoke.mjs
+CINDER_URL=http://127.0.0.1:8787 npm run test:audit
 npm run build
 ```
 
-The HTTP tests expect the local service on port 8787, or `CINDER_URL` pointing at another environment. Live AI testing is explicitly enabled with `CINDER_TEST_AI=1` and consumes bounded provider resources. Contract tests run entirely on an in-process local EVM with mock ERC-20 tokens.
+These HTTP tests create actual testnet accounts and state. Repeated runs consume finite faucet inventory and quotas. Set `CINDER_TEST_AI=1` for one bounded external inference in `native-smoke.mjs`; that consumes provider resources. Contract tests use a local EVM with mock assets. The Solidity contracts are a separate reference path, not the native CINDER consensus or issuance system.
 
-## Deploy on your Cloudflare account
+Measured results include client signing, HTTP transport and response verification:
+
+| Environment | Calls | Elapsed | Calls/second | Median | p95 |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| [Localhost](public/examples/native-channel-local.json) | 10,000 | 169.244 s | 59.09 | 14.87 ms | 30.19 ms |
+| [Public endpoint, sequential client](public/examples/native-channel-public.json) | 100 | 38.819 s | 2.58 | 353.3 ms | 519.7 ms |
+
+Each channel used two global opening/closing checkpoints and 24 total network-fee atoms, plus 100 resource atoms per accepted call. Intermediate responses are collateral-backed operator acknowledgments; native balances settle at closing. These measurements do not establish independent-validator finality, a dollar price or a production capacity ceiling. The public sequential sample does not establish the requested 10,000 calls/hour workload.
+
+The [public application checks](public/examples/native-apps-public.json) exercise uploaded audio, byte ranges, exact royalties, funded liquidity, swaps and resource redemption. The [public Llama result](public/examples/native-live-inference.json) records one actual provider response and native settlement. [Public ledger replay](public/examples/native-audit-public.json) reconstructs the presented history; its timestamp, verified count and observed head are included in the report.
+
+## Deploy on Cloudflare
 
 ```sh
 npx wrangler login
 npm run deploy
 ```
 
-This creates one Worker, two SQLite-backed Durable Object classes and a Workers AI binding. It uses the account's existing plan. No domain purchase or plan upgrade is required. Global defaults limit inference attempts to 200/day, total compute attempts to 5,000/day, sessions to 500/day, and session creation to 10/day per daily salted IP hash. Limits are in `wrangler.jsonc`; they are application bounds, not an account-wide billing guarantee.
+Deployment uses one Worker, the native `NativeLedger` Durable Object and two retained legacy sandbox classes, plus a Workers AI binding. It does not require a purchased domain. Hosting and inference can incur charges on the connected account. Source quotas bound intended activity, not all possible platform costs.
 
-The issuer signing key is generated once inside the provider Durable Object and stored in its private storage. No private key is checked into this repository. Preserve that object's storage to preserve issuer identity. Record the public key after deployment.
+The native operator signing key is generated inside the native Durable Object and stays in its private storage. Preserve that storage to preserve identity and history. After deployment, record the genesis hash and operator public key through a trusted channel; clients can pin that key. A self-hosted copy is a different ledger unless its history and keys are deliberately migrated. It does not automatically become another validator of this network.
 
-## What's here
+Public receipt inspection with local signature verification is available at [the explorer](https://cinder-rail.ee777db.workers.dev/explorer); [Chinese research](https://cinder-rail.ee777db.workers.dev/research) covers all 48 requested ticker identities, with explicit ambiguity where a symbol does not uniquely identify an asset.
 
-- `src/`: quote validation, P-256 authorization, session ledger, idempotent responses, provider execution and receipt signing.
-- `public/`: responsive console, protocol/developer pages, API discovery, downloadable receipts.
-- `contracts/`: agent registry, EIP-712 cumulative ERC-20 channel, provenance receipt registry, explicit trust constraints.
-- `scripts/`: autonomous caller, offline verifier, HTTP smoke tests, Solidity compile/adversarial tests, documentation build.
-- `docs/`: [architecture](docs/architecture.md), [economics](docs/economics.md), [verification](docs/verification.md), [security](docs/security.md), [launch](docs/launch.md), [roadmap](docs/roadmap.md), [中文决策说明](docs/founder-memo-zh.md).
+## Read and inspect
 
-## Operating boundaries
+- [Native developer guide](docs/developers-native.md): SDK, API and operational semantics.
+- [Native design](docs/native-design.md), [channels](docs/channel-interface.md) and [resource market](docs/economy-interface.md): protocol details.
+- [Security](docs/security.md) and [privacy](docs/privacy.md): exact trust and data boundaries.
+- [Completion report](docs/completion-gate.md) and [0.2 launch notes](docs/launch-v0.2.md): demonstrated capabilities and outstanding conditions.
+- `src/native-*`: deterministic transitions, cryptographic authorization, media and durable sequencing.
+- `sdk/native-client.ts`, `browser/`: client verification, wallet vault and application interface.
+- `scripts/audit-native.mjs`: replay of authorized state transitions, native supply, WORK accounting, creator allocations and channel journals.
 
-One operator hosts the sandbox. There is no distributed consensus, live USDC settlement, customer custody, zero-knowledge inference proof, hardware attestation, reserve backing or open provider marketplace in this release. Standard x402 adapters and audited funded channels are production milestones, not current capabilities. Provider choice is fixed; no arbitrary remote URLs are fetched. Sessions, outputs and receipts expire after 24 hours. A separate private session token authorizes quotes and ledger reads; it is never exported with receipts. Interrupted pending requests have a two-minute recovery lease; an interrupted external inference is never automatically re-executed.
+The old `/compute` sandbox uses P-256 signatures and expiring nontransferable credits. Its 24-hour retention policy applies to that sandbox only. The native ledger, compute outputs, published metadata and signed journals are public and have no automatic deletion schedule. Do not submit private material. [Privacy details](docs/privacy.md).
 
-Public quotas may be exhausted by other visitors. These controls bound ordinary use and costs; they are not a Sybil-resistant identity system. See [security](docs/security.md) and the application's `/privacy` page.
-
-## Contributing
-
-Use a GitHub issue for reproducible non-sensitive bugs and provider-integration proposals. Never publish keys, session IDs, private prompts or exploit details affecting a live deployment. For a financial deployment, arrange an independent security audit and operational/legal review before accepting funds. See [CONTRIBUTING.md](CONTRIBUTING.md).
-
-MIT licensed. Model services have their own applicable provider/model terms.
-
-An optional GitHub Actions configuration is included at `docs/ci.example.yml`. It is supplied as a template because the publishing credential does not include GitHub workflow permissions. All release checks were run directly.
+MIT licensed. Provider/model terms apply separately. Report non-sensitive bugs through [GitHub issues](https://github.com/ee777db/cinder-rail/issues); do not publish private keys, playback tokens or sensitive exploit details. No independent audit, complete quantum-safe infrastructure, proof of correct LLM inference, perpetual exchange or external music-site integration is represented by this release.

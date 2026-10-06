@@ -1,0 +1,259 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Native developer guide — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>Native developer guide</h1>
+<p>Version 0.2 · 5 October 2026</p>
+<p>The native API operates <code>cinder-devnet-1</code>. CINDER is its own asset, identified by <code>cinder-devnet-1/native</code>, with six decimals. One CINDER is 1,000,000 integer atoms. All monetary quantities in JSON are canonical decimal strings: <code>&quot;100&quot;</code>, not <code>100</code>, <code>&quot;0100&quot;</code> or <code>&quot;1e2&quot;</code>. No endpoint accepts another chain&#39;s assets.</p>
+<p>The operator orders requests and signs checkpoints with ML-DSA-65. Native signatures authenticate actions and checkpoints; they do not create independent consensus, prove LLM correctness or authenticate a real-world person. Consult <a href="/docs/completion-gate.html">the completion report</a> for deployment evidence.</p>
+<h2>Start an agent</h2>
+<p>Build the bundled SDK with <code>node scripts/build-native.mjs</code>. Save the following as <code>agent-example.mjs</code> in the repository root and run <code>CINDER_URL=http://127.0.0.1:8787 node agent-example.mjs</code> while the local server is running. Setting <code>CINDER_URL</code> to a native deployment uses that actual test network instead.</p>
+<pre><code class="language-js">import { CinderNativeClient } from &#39;./public/native-sdk.js&#39;;
+
+const client = new CinderNativeClient(
+  process.env.CINDER_URL || &#39;http://127.0.0.1:8787&#39;,
+  process.env.CINDER_OPERATOR_KEY || undefined,
+);
+const network = await client.connect();
+const payer = await client.createWallet();
+const recipient = await client.createWallet();
+await client.claimFaucet(payer);
+
+// Send 0.001 CINDER; the signed gross ceiling includes the 12-atom fee.
+const transfer = await client.transfer(payer, recipient.address, &#39;1000&#39;, &#39;1012&#39;);
+console.log({ network: network.chainId, transaction: transfer.txHash });
+
+// One SHA-384 job costs 100 resource atoms plus 12 fee atoms.
+const reserved = await client.compute(payer, &#39;hash&#39;, &#39;A bounded agent job.&#39;, &#39;112&#39;);
+for (let attempt = 0; attempt &lt; 120; attempt++) {
+  const job = await client.job(reserved.txHash);
+  if (job.status !== &#39;pending&#39;) {
+    console.log({ status: job.status, output: job.output, refundAtoms: job.refundAtoms });
+    break;
+  }
+  await new Promise(resolve =&gt; setTimeout(resolve, 1000));
+}
+</code></pre>
+<p>Do not print, commit or upload <code>payer</code> or <code>recipient</code>: these objects contain private keys. The example holds ephemeral keys in process memory. Applications need a deliberate secret-storage and recovery policy. The web wallet supplies a local encrypted-backup flow; the SDK does not silently save keys to disk.</p>
+<p>Passing a previously trusted <code>CINDER_OPERATOR_KEY</code> makes <code>connect()</code> reject a changed operator key. Omitting it uses the first observed key, which is trust on first use. Learning the key from the same untrusted response whose signature you verify is not independent authentication.</p>
+<h2>Authorization, fees and retries</h2>
+<p>The signed transaction shape is:</p>
+<pre><code class="language-js">{
+  domain: &#39;cinder.transaction.v1&#39;,
+  chainId: &#39;cinder-devnet-1&#39;,
+  sender: &#39;cin1&#39; + &#39;&lt;96 lowercase hex characters&gt;&#39;,
+  nonce: 1,
+  validUntil: &#39;&lt;canonical ISO timestamp within five minutes&gt;&#39;,
+  maxDebitAtoms: &#39;1012&#39;,
+  actions: [{ type: &#39;transfer&#39;, to: &#39;&lt;registered address&gt;&#39;, amountAtoms: &#39;1000&#39; }],
+}
+</code></pre>
+<p>Each accepted ordinary transaction consumes exactly the next account nonce. A standard batch fee is <code>10 + 2 × actionCount</code> atoms, with at most 16 core actions. Music, economy and channel transitions each require one action and charge 12 atoms; faucet issuance is the exception with zero fee. <code>maxDebitAtoms</code> bounds <strong>gross CINDER debits</strong>, including fees, regardless of refunds or amounts the same action might credit back. Resource quantities, recipients, slippage limits and service commitments are also signed.</p>
+<p>For safe delivery, separate authorization from submission and retain the envelope while the result is uncertain:</p>
+<pre><code class="language-js">const envelope = await client.authorize(payer, [
+  { type: &#39;transfer&#39;, to: recipient.address, amountAtoms: &#39;1000&#39; },
+], &#39;1012&#39;);
+const result = await client.submit(envelope);
+// If delivery fails ambiguously, retry this exact envelope.
+// Do not create a new nonce until the original outcome is resolved.
+</code></pre>
+<p>Submission is <code>POST /api/native/submit</code> with <code>{transaction,signature,computeInput?}</code>. An exact successful replay returns the original receipt without a second debit, after authenticating the original signature again. A modified payload or conflicting nonce is not an idempotent retry. Serialize mutations from a given wallet: two independently authorized concurrent transactions can choose the same nonce.</p>
+<p><code>submit()</code> verifies the expected transaction and submitted authorization, transaction hash, operator checkpoint signature, committed transaction/postings/result hashes, zero-sum native postings and the maximum gross debit. A separate credit back to the sender does not hide an excessive gross debit. This is receipt verification, not complete ledger replay. A receipt could still be semantically invalid within those checks; the auditor re-executes the full history to detect that.</p>
+<p><code>job()</code> additionally retrieves the original compute reservation, verifies the payer public key derives the recorded address and authenticates the original signature, then recomputes that reservation. Completed or failed jobs must carry a valid settlement receipt with the expected domain, network, request, service, model, output commitment, refund and destination postings. Unknown states/domains, missing receipts and mismatching unsigned response fields are rejected. A deterministic hash completion must equal the original authorized input hash. These checks do not prove the correctness of model execution.</p>
+<p>Convenience calls such as <code>compute()</code> create an authorization internally. If an application must survive uncertain delivery or process restart, use <code>authorize()</code> and <code>submit()</code> explicitly, save the exact envelope and input under the application&#39;s retention policy, and keep the resulting transaction hash. Do not log private keys or playback credentials with an error object.</p>
+<h2>High-frequency channels</h2>
+<p>Opening a channel reserves <code>capacity × 100</code> atoms for hash calls; capacity is 1–10,000 and expiry at most 24 hours away. The session signing key differs from the wallet key. It can spend only that channel&#39;s allowance, with increasing sequence numbers. It cannot transfer the rest of the wallet.</p>
+<p>The network also reserves lifetime journal slots when opening: accepted calls plus all unused open-channel capacity cannot exceed 100,000. A new call moves one reserved slot to accepted history, an exact retry consumes none, and closure releases unused slots. Inspect <code>/info.limits.channelAvailableCalls</code> before planning a batch; the query does not itself reserve capacity. At most 32 channels may remain open.</p>
+<pre><code class="language-js">const opened = await client.openChannel(payer, 100, 60 * 60 * 1000);
+const { channel, sessionKey } = opened;
+let previousHash = channel.journalHead;
+
+for (let sequence = 1; sequence &lt;= 100; sequence++) {
+  const envelope = client.authorizeChannelCall(
+    sessionKey, channel.channelId, sequence, `request ${sequence}`,
+  );
+  const call = await client.submitChannelCall(
+    envelope, sessionKey.publicKey, previousHash,
+  );
+  previousHash = call.result.journalHash;
+}
+const closed = await client.closeChannel(payer, channel.channelId);
+console.log({ settlement: closed.txHash });
+</code></pre>
+<p>Protect the session key as a spending capability. Save the last accepted sequence, journal hash and any uncertain signed envelope. Exact call retries authenticate the original signature and input; they do not increment consumption. Same-sequence substitution is rejected. Accepted call state and journal rows persist atomically.</p>
+<p><code>openChannel()</code> retains an uncertain signed opening and its generated session key in the <strong>same client instance</strong>. Retry the same owner, capacity and lifetime to resume it; do not create another client merely because the response was lost. Identical concurrent openings share one in-flight operation. Opening errors expose <code>pendingTransactionHash</code> without a private key. The cache is not durable: if the process exits before the session key is saved, that key cannot be recovered from the public chain. The account owner can still close the channel or await expiry.</p>
+<p>The SDK validates and caches terms from the signed opening receipt, including the owner&#39;s key/address binding and original authorization. Fresh clients fetch that receipt using the channel ID. Every call response is checked for exact authorization, journal domain, valid original recording time, service, price, input/output, fixed zero call fee, zero settled amount and all immutable channel fields and balance arithmetic. An exact saved response remains recoverable after expiry or close; its original recording time must fall within the channel lifetime.</p>
+<p>Keep supplying <code>previousHash</code> as the example does. Sequence one is checked against the opening journal head; later calls check a supplied or cached predecessor. A fresh client with neither cannot establish the missing history from one later record. <code>channelJournal()</code> verifies returned records and continuity within the available page; reconstruct the full chain from genesis for complete verification. <code>channel()</code> checks terms and arithmetic but does not prove the state is the newest one served by the operator.</p>
+<p>Each call consumes a 100-atom entitlement but has no additional network fee and no global native postings. The full deposit remains in escrow until a closing checkpoint pays consumed calls and refunds unused principal. The owner pays a 12-atom close fee; automatic expiry settles without that fee. Host availability still determines when an expired channel is processed. A provisional call acknowledgment is not decentralized finality.</p>
+<p>Only the deterministic SHA-384 service uses this path today. Because the caller already hashes the input for authorization, this operation is a transparent transport/accounting test, not a claim to useful outsourced AI work. The <a href="/docs/channel-interface.html">channel interface</a> specifies journals, deadlines, recovery and exact costs.</p>
+<h2>Publish music and pay recipients</h2>
+<p>Audio upload supports MPEG, WAV and Ogg up to 4 MiB. The SDK signs 24 KiB chunks and verifies final upload completion. Audio bytes reside in the operator&#39;s durable storage; the public ledger commits their SHA-384 hash and publication metadata. Upload only material you have the right to distribute. <code>rightsDeclared:true</code> is a publisher assertion, not an ownership adjudication.</p>
+<p>The following continues the agent example, using an existing local <code>my-original.wav</code>. The funded payer publishes; the registered recipient also receives royalties.</p>
+<pre><code class="language-js">import { readFile } from &#39;node:fs/promises&#39;;
+
+const audio = new Uint8Array(await readFile(&#39;./my-original.wav&#39;));
+const uploaded = await client.uploadAudio(payer, audio, &#39;audio/wav&#39;);
+const published = await client.transact(payer, {
+  type: &#39;music.publish&#39;,
+  audioHash: uploaded.audioHash,
+  mime: uploaded.mime,
+  bytes: uploaded.bytes,
+  title: &#39;My original recording&#39;,
+  artist: &#39;Independent artist&#39;,
+  recipients: [
+    { address: payer.address, bps: 7000 },
+    { address: recipient.address, bps: 3000 },
+  ],
+  priceAtoms: &#39;101&#39;,
+  rightsDeclared: true,
+}, &#39;12&#39;);
+
+// The earlier transfer funded this listener. Total debit is 101 + 12 atoms.
+const paid = await client.listen(recipient, published.receipt.result.trackId, &#39;113&#39;);
+const playbackUrl = client.playbackUrl(uploaded.audioHash, paid.playbackToken);
+const response = await fetch(playbackUrl);
+if (!response.ok) throw new Error(&#39;Playback unavailable&#39;);
+const receivedAudio = new Uint8Array(await response.arrayBuffer());
+console.log({ paidTransaction: paid.txHash, receivedBytes: receivedAudio.length });
+</code></pre>
+<p>Recipient weights must total 10,000 basis points. Largest-remainder allocation conserves every atom; 101 atoms at 70/30 allocate 71 and 30. Payment buys a one-hour access window, not a certified human play. Repeated play requests with the same payer and <code>listenId</code> cannot debit again under a new transaction.</p>
+<p>If <code>listen()</code> loses a response, calling it again on the same client with the same payer/track and compatible terms retries the retained authorization. If payment already succeeded, it only repeats the separate access request. An error includes <code>pendingTransactionHash</code>, <code>listenId</code>, <code>authorization</code> and an existing <code>paid</code> receipt when known. Save those recovery records deliberately; after restoring a client, submit that original authorization if payment is uncertain, then call <code>client.musicAccess(payerKey, pendingTransactionHash)</code>. A public transaction hash does not itself grant private access. Generating another <code>listenId</code> after losing the original state authorizes another purchase, so it is not a recovery procedure.</p>
+<p><code>listen()</code> first pays and verifies the public receipt, then signs a <strong>separate private</strong> <code>/music/access</code> request. Public payment receipts, transaction replays and journal exports never contain the playback token. The private proof binds the owner, paid transaction, fresh nonce and deadline; the server verifies that the owner paid. The server does not maintain a consumed-nonce table for these short-lived proofs, so one may retrieve the same token again during its validity window. Keep the proof private. Recovering the token does not extend the original one-hour window.</p>
+<p>The playback URL contains a bearer token: do not log, publish or include it in analytics. Anyone possessing it can fetch that audio until expiry. Media supports HTTP byte ranges and sends private/no-store caching headers. Paying for access does not impose DRM on downloaded bytes. <code>music.unpublish</code> stops new purchases; it does not erase public history or immediately revoke already-paid access.</p>
+<h2>WORK and the native spot market</h2>
+<p>WORK is a self-issued native resource entitlement, not an ERC-20, stablecoin or dollar promise. One WORK consumes one 1–4,000-character SHA-384 operation. The current posted offer is 100 CINDER atoms per WORK while inventory remains.</p>
+<pre><code class="language-js">import { nativeHash } from &#39;./public/native-sdk.js&#39;;
+
+await client.transact(payer, {
+  type: &#39;economy.buy&#39;, workUnits: &#39;100&#39;, maxCinderAtoms: &#39;10000&#39;,
+}, &#39;10012&#39;);
+const input = &#39;Redeem one specified unit of work.&#39;;
+const redeemed = await client.transact(payer, {
+  type: &#39;economy.redeem&#39;, inputHash: nativeHash(input),
+}, &#39;12&#39;, input);
+if (redeemed.receipt.result.output !== nativeHash(input)) {
+  throw new Error(&#39;Incorrect deterministic output&#39;);
+}
+console.log((await client.economy(payer.address)).wallet);
+</code></pre>
+<p>Liquidity is funded from real test balances; no synthetic reserves are inserted. First LP shares are <code>floor(sqrt(CINDER atoms × WORK units))</code>. The constant-product pool retains a 30-basis-point trading fee. A swap input <code>a</code> with reserves <code>x,y</code> produces <code>floor(a × 9970 × y / (x × 10000 + a × 9970))</code>. The network fee is separate. Quotes do not reserve execution: signed <code>minOut</code> and deadlines protect against worse fills, and rejection commits nothing.</p>
+<p>An example CINDER-input swap after someone has supplied liquidity:</p>
+<pre><code class="language-js">const { state } = await client.economy(payer.address);
+const amountIn = 1000n;
+const x = BigInt(state.pool.cinderAtoms);
+const y = BigInt(state.pool.workUnits);
+if (x === 0n || y === 0n) throw new Error(&#39;This pool has no liquidity&#39;);
+const expected = amountIn * 9970n * y / (x * 10000n + amountIn * 9970n);
+if (expected &lt; 1n) throw new Error(&#39;Trade is smaller than one resource unit&#39;);
+await client.transact(payer, {
+  type: &#39;economy.swap&#39;, assetIn: &#39;CINDER&#39;, amountIn: amountIn.toString(),
+  minOut: expected.toString(),
+  deadline: new Date(Date.now() + 120000).toISOString(),
+}, &#39;1012&#39;);
+</code></pre>
+<p>Use the full <a href="/docs/economy-interface.html">economy interface</a> for liquidity addition/removal, WORK transfer, rounding and bounds. There is one spot pair, no borrowing, leverage, liquidation, perpetual contract, cross-chain bridge or oracle-enforced dollar price. Liquidity provision can lose relative value and does not promise a return.</p>
+<h2>Inference</h2>
+<p><code>client.compute(key,&#39;inference&#39;,input,&#39;512&#39;)</code> reserves 500 resource atoms plus 12 fee atoms. The configured Meta Llama provider receives the raw input through Cloudflare Workers AI. A successful settlement publishes the output and provider/model assertion in the signed public ledger. Failed or expired jobs refund 500 resource atoms; the network fee remains charged. The timeout is two minutes. An upstream service may have executed before a timeout, so recovery is not a universal exactly-once guarantee.</p>
+<p>A verified Llama receipt proves attribution and integrity under the operator key. It does not prove the claimed model weights executed, that no other input affected the answer, or that the answer is true. Do not submit private prompts: even though raw inputs are not stored in native ledger records, commitments can reveal guessable inputs and the output may repeat the prompt.</p>
+<h2>Public API map</h2>
+<p>Prefix every path below with <code>/api/native</code>. Successful response contents, including amounts and model configuration, should be read from the running environment.</p>
+<table>
+<thead>
+<tr>
+<th>Method and path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /info</code>, <code>GET /genesis</code></td>
+<td>Network identity, limits, prices, operator key and signed genesis</td>
+</tr>
+<tr>
+<td><code>POST /accounts</code></td>
+<td>Register an ML-DSA public key with proof of possession</td>
+</tr>
+<tr>
+<td><code>GET /accounts/:address</code></td>
+<td>Public balance, nonce, key and faucet state</td>
+</tr>
+<tr>
+<td><code>POST /submit</code></td>
+<td>Submit a signed atomic transaction or replay the exact envelope</td>
+</tr>
+<tr>
+<td><code>GET /transactions/:hash</code>, <code>GET /jobs/:hash</code></td>
+<td>Public receipt and compute completion/refund state</td>
+</tr>
+<tr>
+<td><code>GET /blocks?after=0</code>, <code>GET /export?after=0</code></td>
+<td>Pages of 20 checkpoint headers or full receipts with account public keys</td>
+</tr>
+<tr>
+<td><code>POST /channels/call</code></td>
+<td>Signed bounded session call with raw input</td>
+</tr>
+<tr>
+<td><code>GET /channels/:id</code>, <code>GET /channels/:id/journal?after=0</code></td>
+<td>Channel and pages of 20 signed call records</td>
+</tr>
+<tr>
+<td><code>POST /media/upload</code></td>
+<td>Signed sequential audio chunk upload</td>
+</tr>
+<tr>
+<td><code>GET /music/catalog</code>, <code>GET /music/tracks/:id</code></td>
+<td>Public publication metadata and splits</td>
+</tr>
+<tr>
+<td><code>POST /music/access</code></td>
+<td>Private payer authorization to obtain an existing unexpired token</td>
+</tr>
+<tr>
+<td><code>GET /media/:audioHash?token=...</code></td>
+<td>Authorized audio delivery, including byte ranges</td>
+</tr>
+<tr>
+<td><code>GET /economy?address=...</code></td>
+<td>Global WORK/pool state and optional wallet entitlements</td>
+</tr>
+</tbody></table>
+<p>Native APIs allow cross-origin requests; spending requires signatures rather than browser cookies. Keep JSON requests below 48,000 bytes. Current native daily bounds are 30 inferences globally; 300 ordinary writes, 20 registrations, 1,800 reads and 250,000 channel-call requests per daily salted IP identity; global caps also apply. Request limits include attempts and retries, not just successful calls.</p>
+<p>Lifetime limits are separate: 10,000 global checkpoints, new ordinary work stopped at existing height 9,900, and 100,000 accepted-plus-reserved channel journal slots. Owner-authorized channel close is an explicit recovery exception; both it and system expiry can consume the remaining checkpoint headroom. Already accepted journal records never become reusable lifetime slots. <code>/info.limits</code> reports these values and current channel usage. Upload and account bounds also apply. Limits are operational abuse controls, not proof of unique users or a guarantee of capacity.</p>
+<p><code>/export</code> and channel-journal pages use a separate history-read allowance: 20,000 requests per IP and 100,000 globally each day. Ordinary <code>/info</code>, account and transaction reads retain their ordinary limits. Treat pagination and polling as bounded operations rather than assuming unlimited public reads.</p>
+<h2>Public deployment evidence</h2>
+<p>The public test network is <a href="https://cinder-rail.ee777db.workers.dev">Cinder Rail</a>. These files preserve observed results at the timestamps they contain:</p>
+<table>
+<thead>
+<tr>
+<th>Report</th>
+<th>What it records</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-network.json">Network and genesis</a></td>
+<td>Operator public key, signed genesis and genesis hash; compare with your previously trusted pin</td>
+</tr>
+<tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-apps-public.json">Application workflow</a></td>
+<td>Ten stages covering upload, publication, paid original bytes, exact 101-atom 71/30 split, duplicate rejection, real test-asset liquidity, exchange, WORK redemption, LP withdrawal and unpublication</td>
+</tr>
+<tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-channel-public.json">Public channel run</a></td>
+<td>100 calls; median 353.3 ms, p95 519.7 ms, signing and verification included; two open/close checkpoints and 24 network-fee atoms</td>
+</tr>
+<tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-channel-local.json">Local channel run</a></td>
+<td>10,000 calls; median 14.87 ms, p95 30.19 ms on the local test path; a different environment and sample size</td>
+</tr>
+<tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-live-inference.json">Live inference</a></td>
+<td>One real provider response with native reservation and settlement; no proof of model execution or factual accuracy</td>
+</tr>
+<tr>
+<td><a href="https://cinder-rail.ee777db.workers.dev/examples/native-demo.json">Original audio demonstration</a></td>
+<td>Original synthesized test audio, publication and three demonstration-operated recipient wallets; user-funded test liquidity, not independent artist adoption</td>
+</tr>
+</tbody></table>
+<p>The public channel report is an end-to-end request observation, not consensus finality or a throughput guarantee. Neither public nor local results establish an SLA. A successful past workflow does not automatically validate later code changes; retain the environment, report and release version when reproducing it.</p>
+<h2>Independently replay the journal</h2>
+<pre><code class="language-sh">CINDER_URL=http://127.0.0.1:8787 node scripts/audit-native.mjs
+</code></pre>
+<p>Set <code>CINDER_OPERATOR_KEY</code> to an independently trusted key and optionally <code>CINDER_REPORT=report.json</code>. The auditor pins genesis, verifies checkpoint signatures and hash links, binds public keys to addresses, authenticates client actions, re-executes monetary transitions, verifies closed channel journals and reconstructs CINDER and WORK supply. A large channel requires paginating its full journal and consumes the separate history-read quota; initial identity lookups still consume ordinary read quota.</p>
+<p>Successful replay establishes that the presented history obeys these rules. It cannot prove there is no alternate signed history, force an unavailable operator to answer, recover deleted storage or establish independent validator agreement. Save previously observed heads and compare them across independent observers for evidence of equivocation.</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

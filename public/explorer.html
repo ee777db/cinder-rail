@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f4f1e8">
+  <meta name="description" content="查看 CINDER 原生测试网络的真实交易、检查点与记账。在浏览器内核对 ML-DSA-65 签名与收据哈希。">
+  <title>Cinder — 公开账本</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/explorer.css">
+  <script type="module" src="/explorer.js"></script>
+</head>
+<body>
+  <a class="skip" href="#ledger">跳到公开账本</a>
+  <header><a class="brand" href="/" aria-label="Cinder 首页"><span aria-hidden="true">☲</span>Cinder <small>公开账本</small></a><nav aria-label="主导航"><a href="/">钱包与应用</a><a href="/protocol">机制</a><a href="/developers">开发者</a></nav><span class="badge">NATIVE DEVNET</span></header>
+  <main>
+    <section class="intro"><div><p class="eyebrow">CINDER / OPEN LEDGER</p><h1>每一笔流动，<br>都有<span>迹可循。</span></h1><p>打开真实交易，核对签名与每一项账本变动。<br>无需创建钱包，也无需相信一个漂亮的数字。</p></div><div class="intro-aside"><span aria-hidden="true">☲</span><p>原生 CINDER · 6 位小数<br>单一运营方测试网络 · 无现金价值</p></div></section>
+    <section class="network" aria-label="已读取的网络状态"><div><span>网络</span><strong id="network-name">—</strong></div><div><span>已见检查点高度</span><strong id="network-height">—</strong></div><div><span>创世 CINDER 总量</span><strong id="network-supply">—</strong></div><button id="refresh" type="button">重新读取 ↻</button></section>
+    <details class="identity"><summary>这个账本由谁签署？<span>查看公开身份</span></summary><p id="pin-note">正在读取创世记录与运营方公钥。</p><dl><dt>运营方公钥指纹 · SHA-384</dt><dd><code id="operator-fingerprint">—</code></dd><dt>创世记录哈希</dt><dd><code id="genesis-hash">—</code></dd></dl><p>首次见到的公钥需要你建立信任；签名有效不等于独立验证者达成共识。本页不重放完整账本，也不证明 LLM 计算正确。</p><a href="/api/native/genesis" target="_blank" rel="noopener">查看完整创世记录 ↗</a></details>
+    <form id="search" class="search"><label for="tx-query">查找交易 <small>TRANSACTION HASH</small></label><div><input id="tx-query" name="tx" type="text" spellcheck="false" autocomplete="off" minlength="96" maxlength="96" pattern="[a-fA-F0-9]{96}" placeholder="粘贴完整的 96 位交易哈希" required><button type="submit">核对收据 ↗</button></div></form>
+    <div class="status" id="status" role="status" aria-live="polite">正在连接公开账本…</div>
+    <div class="error" id="error" role="alert" hidden><p id="error-message"></p><button type="button" id="retry">重试</button></div>
+    <section class="ledger-layout" id="ledger" tabindex="-1">
+      <section class="history" aria-labelledby="history-title"><div class="section-heading"><div><p class="eyebrow">01 / CHECKPOINTS</p><h2 id="history-title">已签署的记录</h2></div><span id="page-label">—</span></div><div id="block-list" class="block-list"><p class="empty">连接后显示实际检查点。</p></div><div class="pagination"><button id="older" type="button" disabled>← 更早 20 条</button><button id="newer" type="button" disabled>更新 20 条 →</button></div><p class="footnote">按需读取，不自动轮询。列表核对检查点签名和页内哈希衔接；点击一条记录，再核对其交易授权与记账。</p></section>
+      <section class="detail" aria-labelledby="detail-title"><div class="section-heading"><div><p class="eyebrow">02 / RECEIPT</p><h2 id="detail-title">把账看清楚。</h2></div><button type="button" id="download" disabled>导出 JSON ↓</button></div><p id="detail-empty" class="empty">选择左侧记录，或输入完整交易哈希。<br>这里显示收到的实际收据。</p><div id="receipt" hidden><div id="verification" class="verified"></div><dl class="receipt-meta"><dt>交易哈希</dt><dd><code id="receipt-hash"></code></dd><dt>检查点 / 时间</dt><dd id="receipt-time"></dd><dt>操作</dt><dd id="receipt-action"></dd><dt>签名支出上限</dt><dd id="receipt-budget"></dd></dl><h3>账本变动 <small>CINDER</small></h3><div class="postings-wrap"><table><thead><tr><th scope="col">账户</th><th scope="col">变动</th></tr></thead><tbody id="postings"></tbody></table></div><p class="footnote">逐项展示记账分录；正数表示记入，负数表示扣除。分录总和为零，不代表价格、成交量或完整状态已经审计。</p><details class="raw"><summary>查看完整收据</summary><pre id="receipt-json"></pre></details></div></section>
+    </section>
+  </main>
+  <footer><a href="/">☲ CINDER</a><p>自有原生账本 · 可核对的公开记录</p><a href="/docs/security.html">安全边界 ↗</a></footer>
+</body>
+</html>

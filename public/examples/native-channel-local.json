@@ -1,0 +1,17 @@
+{
+  "network": "http://127.0.0.1:8899",
+  "checkedAt": "2026-10-06T01:06:42.317Z",
+  "channelId": "a692ebaa3908e2db12f5eca53eaf20e10c425676f1a3616cb4b28bed8cc279534c60136904e20e103dd15fde55fddc6c",
+  "calls": 10000,
+  "checkpointsForOpenAndClose": 2,
+  "networkFeesAtoms": "24",
+  "networkFeeAtomsPerCall": 0.0024,
+  "resourceAtomsPerCall": 100,
+  "totalDurationMs": 169244,
+  "callsPerSecond": 59.09,
+  "medianEndToEndMs": 14.87,
+  "p95EndToEndMs": 30.19,
+  "clientIncludesSigningAndVerification": true,
+  "settlement": "34c5a1cd6c3559a5f9dd798e899d452b1b67ae8f9c59035c8f743d9e740396c45a315d3b73b83db0ba50f486b622e414",
+  "scope": "Measured HTTP session-authorized calls, with durable collateral reservations and later operator-checkpoint settlement. Not decentralized finality or a dollar-price benchmark."
+}

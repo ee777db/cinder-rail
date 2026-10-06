@@ -1,0 +1,17 @@
+{
+  "network": "https://cinder-rail.ee777db.workers.dev",
+  "checkedAt": "2026-10-06T02:23:58.650Z",
+  "channelId": "b5fa61f16d21a1a43afe14f4e5b60a75fc811b17782a6c4da6ab175b94c773af3bffa6ef66a48f187bf641e9ead26a2a",
+  "calls": 100,
+  "checkpointsForOpenAndClose": 2,
+  "networkFeesAtoms": "24",
+  "networkFeeAtomsPerCall": 0.24,
+  "resourceAtomsPerCall": 100,
+  "totalDurationMs": 38819,
+  "callsPerSecond": 2.58,
+  "medianEndToEndMs": 353.3,
+  "p95EndToEndMs": 519.7,
+  "clientIncludesSigningAndVerification": true,
+  "settlement": "a5d34b7626a2b9d21f5fe7bcb3b780ef3066111f09fea4fdbabd0828d26524a1781e9d0c4978f7cc6f31334c46958668",
+  "scope": "Measured HTTP session-authorized calls, with durable collateral reservations and later operator-checkpoint settlement. Not decentralized finality or a dollar-price benchmark."
+}

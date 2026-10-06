@@ -1,0 +1,207 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>这些币到底在做什么：网络、代币与可持续用途 — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>这些币到底在做什么：网络、代币与可持续用途</h1>
+<p>核验日期：2026-10-05。本文使用项目文档、客户端发布记录和治理公告；资料日期不同，不把今天抓取的旧页面当成今天发生的新事件。没有采用即时价格、排名、交易量或收益率来推导结论。表中“判断”是基于机制的分析，不是价格预测，也不是对官方宣传的背书。</p>
+<p>我的核心判断是：<strong>时代需要的不是一枚包办所有工作的币，而是能让真实工作顺利完成、成本可预测、结果可核验的系统。</strong> 某个网络可以很有用，其代币却只承接很小一部分价值；一个币也可以因货币属性而长期存在，而不承载复杂应用。必须分开看“网络提供什么”“使用时为何需要这个币”“钱最终流向谁”。</p>
+<p>这里的原生币通常由协议规则发行，发起团队或基金会不是承诺兑付的债务人。治理代币也不自动等于公司股权。稳定币则必须另查抵押品、负债、赎回渠道和管理权限。</p>
+<p><strong>符号边界：OPG 是 OpenGradient，不能直接改写成 OP。</strong> 本次按其官方 SDK、链与代币地址核验，详见 <a href="/docs/coin-research-identity.html">OPG 与同名资产</a>。下表额外列出 Optimism OP 作为比较对象。ZEC 与 XMR 分开列；MANTRA 与旧 OM 的关系单独说明。</p>
+<h2>支付、货币与财务隐私</h2>
+<table>
+<thead>
+<tr>
+<th>资产与项目身份</th>
+<th>账本如何工作、核心任务</th>
+<th>代币为何必需，价值流向哪里</th>
+<th>较合适的用途与主要代价</th>
+<th>已核验变化；耐久性判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>BTC — Bitcoin 原生币</strong>；开放协议，没有承诺赎回的发行公司。</td>
+<td>UTXO 账本以 SHA-256 工作量证明排序，节点独立验证；提供无须发行机构许可的资产转移和结算。<a href="https://developer.bitcoin.org/devguide/block_chain.html">机制</a></td>
+<td>BTC 是资产、矿工补贴及手续费单位，普通持币人没有协议分红；约 2,100 万上限是发行规则，不能保证购买力。<a href="https://bitcoin.org/en/faq">FAQ</a></td>
+<td>自主保管、开放结算较契合；基础层吞吐和隐私有限，概率性确认需要等待，小额高频使用通道又要管理流动性。</td>
+<td>Core 31.1 修复链状态数据库写入和 PrivateBroadcast 隐私问题，是维护发布，不等于共识换代。<a href="https://bitcoincore.org/en/releases/31.1/">发布</a> **判断：**规则可验证和持续维护支持延续，长期仍须检验手续费、安全预算与节点可运行性。</td>
+</tr>
+<tr>
+<td><strong>XRP — XRP Ledger 原生币</strong>；不是 Ripple 公司股权。<a href="https://xrpl.org/docs/introduction/what-is-xrp">身份</a></td>
+<td>XRPL Consensus 使用各参与者选择的可信验证者列表达成一致，不是挖矿或按 XRP 质押的 PoS；账本内含支付、发行资产和兑换功能。<a href="https://xrpl.org/docs/concepts/consensus-protocol">共识</a></td>
+<td>XRP 用于销毁型交易费用及账户、对象储备；可充当兑换桥梁，但自动桥接只在该路径更划算时采用。<a href="https://xrpl.org/docs/concepts/transactions/transaction-cost">费用</a>、<a href="https://xrpl.org/docs/concepts/accounts/reserves">储备</a>、<a href="https://xrpl.org/docs/concepts/tokens/decentralized-exchange/autobridging">桥接</a></td>
+<td>适合支付及链内跨资产兑换；代价是验证者选择、列表重叠等信任假设，稳定币使用量也不等于相同规模的 XRP 持有需求。</td>
+<td>2026-09-25 的 xrpld 3.4.1 是紧急安全修复。<a href="https://xrpl.org/blog/2026/xrpld-3.4.1">发布</a> **判断：**支付工具有持续用途，需观察升级质量、独立验证及真实桥接流动性，而不是把 Ripple 商业收入直接算给 XRP。</td>
+</tr>
+<tr>
+<td><strong>ZEC — Zcash 原生币</strong>；协议支持透明及屏蔽支付。</td>
+<td>Equihash PoW 负责排序，零知识证明负责验证屏蔽交易；隐私证明与账本共识是两层机制。<a href="https://zips.z.cash/zip-0301">PoW</a>、<a href="https://z.cash/learn/what-is-the-difference-between-shielded-and-transparent-zcash/">支付模式</a></td>
+<td>ZEC 是转移和手续费单位，发行补贴依协议支持矿工及资金安排；持币没有项目利润分红权。<a href="https://z.cash/learn/what-are-the-economics-of-zcash/">经济规则</a></td>
+<td>适合希望使用屏蔽转账并保留选择性披露能力的场景；钱包、池间迁移与密码学复杂性增加操作和审查负担，零知识不等于抗量子。</td>
+<td>2026-07-28 NU6.3 启用 Ironwood 并限制原 Orchard 池，回应 soundness 漏洞；quantum recoverability 也不等于当前协议已抗量子。<a href="https://z.cash/upgrade/nu6-3/">升级</a>、<a href="https://github.com/zcash/zips/blob/main/zips/zip-2005.md">ZIP 2005</a> **判断：**隐私需求真实，耐久性取决于供应完整性、审查和迁移能力。</td>
+</tr>
+<tr>
+<td><strong>XMR — Monero 原生币</strong>；社区维护的默认隐私电子现金。</td>
+<td>RandomX PoW；现行技术资料描述环签名、隐形地址和 RingCT，分别保护花费来源、收款方及金额。<a href="https://docs.getmonero.org/technical-specs/">机制与边界</a></td>
+<td>XMR 支付费用并奖励矿工，尾部发行约每块 0.6 XMR，持续补贴安全预算；不设最终供应硬上限，也不向普通持币者分红。<a href="https://www.getmonero.org/resources/about/">项目说明</a></td>
+<td>默认隐私和可替代性较有辨识度；钱包同步、网络层泄露和隐私分析仍需处理，不能说绝对无法追踪或 CPU 友好便等于算力分散。</td>
+<td>已核验 2026-07-21 GUI 0.18.5.2；FCMP++ 仍有集成审计工作，不能据提案宣称主网已启用。<a href="https://web.getmonero.org/2026/07/21/monero-GUI-0.18.5.2-released.html">版本</a>、<a href="https://ccs.getmonero.org/proposals/fcmp%2B%2B-integration-audit.html">审计</a> **判断：**独特需求支持延续，关键是审查、开发资助及升级交付。</td>
+</tr>
+<tr>
+<td><strong>DOGE — Dogecoin 原生币</strong>；独立支付账本与社区文化资产。</td>
+<td>Scrypt PoW / AuxPoW，可与其他 Scrypt 链合并挖矿；共享计算工作，不共享余额或交易账本。<a href="https://dogecoin.com/no/dogepedia/how-tos/mining-dogecoin/">挖矿</a></td>
+<td>DOGE 是支付和费用单位，每块持续发行 10,000 DOGE、目标约一分钟；没有最终供应上限，补贴和手续费给矿工。<a href="https://github.com/dogecoin/dogecoin/blob/master/doc/FAQ.md">官方 FAQ</a></td>
+<td>打赏、社区传播和简单支付的认知门槛低；没有美元购买力稳定性或默认链上隐私，社会热度本身不是协议收入。</td>
+<td>本次可核验稳定版 1.14.9 为 2024 年漏洞修复发布，不能仅据发布日期认定开发停止。<a href="https://github.com/dogecoin/dogecoin/releases/tag/v1.14.9">发布</a> **判断：**社区延续是一项优势，仍需钱包、矿工和维护者持续参与。</td>
+</tr>
+<tr>
+<td><strong>LTC — Litecoin 原生币</strong>；Scrypt 支付网络。</td>
+<td>PoW、约 2.5 分钟目标出块、8,400 万发行上限；MWEB 是可选保密扩展，不能等同全链默认匿名。<a href="https://litecoin.com/what-is-litecoin">概览</a>、<a href="https://litecoin.com/news/mobilizing-mweb-litecoin-core-v0-21-3---a-new-era-for-mobile-wallets">MWEB</a></td>
+<td>LTC 承担资产转移、费用和矿工补贴；持币不取得 Litecoin Foundation 收入，低费交易增加也不必然产生大量持币需求。</td>
+<td>适合较简单的支付集成；MWEB 增强功能，也增加验证与维护复杂性。</td>
+<td>官方披露 2026 年 MWEB 通胀漏洞利用及后续 13 个无效区块重组，9 月 Core 0.21.5.8 继续加固。<a href="https://litecoin.com/news/litecoin-mweb-security-incident-postmortem">复盘</a>、<a href="https://github.com/litecoin-project/litecoin/releases/tag/v0.21.5.8">版本</a> **判断：**成熟工具有延续价值，但可靠性应以事故修复、矿池升级及独立审查评估。</td>
+</tr>
+</tbody></table>
+<h2>通用执行网络与应用链</h2>
+<table>
+<thead>
+<tr>
+<th>资产与项目身份</th>
+<th>账本如何工作、核心任务</th>
+<th>代币为何必需，价值流向哪里</th>
+<th>较合适的用途与主要代价</th>
+<th>已核验变化；耐久性判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ETH — Ethereum 的原生 Ether</strong>；基金会、客户端团队和社区维护开放协议。</td>
+<td>PoS 验证者以 ETH 担保，执行 EVM 并对链状态投票；同时提供应用执行、结算和 rollup 数据空间。<a href="https://ethereum.org/developers/docs/consensus-mechanisms/pos/">共识</a></td>
+<td>ETH 用于 gas 与质押，基本费用销毁、优先费及协议奖励支持验证者；净供应变化取决于发行和销毁，不能固定称永远通缩。<a href="https://eips.ethereum.org/EIPS/eip-1559">费用机制</a></td>
+<td>适合重视开放组合、可验证结算及成熟工具的应用；L1 成本、状态增长，以及 L2 的桥接和升级边界增加复杂性。</td>
+<td>EF 2026-09-07 将执行、共识、数据三层抗量子目标定为 2029 年底，并说明迁移难度和备用路线；这是目标而非当前能力。<a href="https://blog.ethereum.org/2026/09/07/protocol-priorities">计划</a> **判断：**通用基础设施的用途较宽，但规模、治理和密码迁移需要持续交付。</td>
+</tr>
+<tr>
+<td><strong>SOL — Solana 原生币</strong>；由多客户端团队及验证者维护的执行网络。</td>
+<td>PoS 权重投票与并行执行；当前资料仍区分 Tower 的确认等级，Alpenglow 是共识替换路线，PoH 本身不能单独解决共识。<a href="https://solana.com/staking">质押</a>、<a href="https://solana.com/docs/rpc">确认等级</a>、<a href="https://forum.solana.com/t/simd-0326-proposal-for-the-new-alpenglow-consensus-protocol/4236">提案</a></td>
+<td>SOL 用于交易费用与质押；现行文档将基本费分给销毁和验证者，优先费给验证者，因此应用活跃不等于全部收入归持币人。<a href="https://solana.com/docs/core/fees">费用</a></td>
+<td>适合需快速组合交互的交易、支付和消费应用；硬件、网络负载、调度竞争及客户端独立性是代价，不能把 processed 响应当 finalized。</td>
+<td>官方 Alpenglow 面板本次可核验为 <strong>Devnet active</strong>，不据此宣称主网已切换。<a href="https://solana.com/upgrades/alpenglow/dashboard">面板</a> **判断：**高效执行有实用价值，耐久性看负载下可靠性、客户端多样性和安全升级。</td>
+</tr>
+<tr>
+<td><strong>BNB — BNB Chain 原生资产</strong>；发源于 Binance 生态，不是 Binance 股票。</td>
+<td>BSC 使用 PoSA，以质押选择有限活跃验证者并轮流出块，提供 EVM 执行；必须把 BSC 与已退出运行的 Beacon Chain 等网络区分。<a href="https://docs.bnbchain.org/bnb-smart-chain/staking/overview/">质押与机制</a></td>
+<td>BNB 用于 BSC gas 和质押，验证者主要获手续费；燃烧机制或交易所用途都不等于持币者有公司现金流索取权。<a href="https://docs.bnbchain.org/bnb-smart-chain/introduction/">网络定义</a></td>
+<td>适合希望沿用 EVM 与现有分发渠道的低费应用；有限验证者集合和生态依赖需要接受。</td>
+<td>文档公告将 Pasteur 列为已过升级，重点是桥、质押、治理和区块利用率；不将测试网 TPS 当生产吞吐。<a href="https://docs.bnbchain.org/announce/">公告</a>、<a href="https://www.bnbchain.org/en/blog/pasteur-hardfork-arrives-on-bsc-mainnet-on-august-25">升级内容</a> **判断：**分发与工具优势真实，长期需要独立运营和持续安全投入。</td>
+</tr>
+<tr>
+<td><strong>ADA — Cardano 原生 ada</strong>；Cardano 社区、基金会、IO 等参与建设。</td>
+<td>Ouroboros PoS 与 eUTXO 账本，交易明确引用输入并携带执行预算；适合在提交前推算有效交易成本。<a href="https://docs.cardano.org/about-cardano/learn/stake-pools">质押池</a>、<a href="https://docs.cardano.org/about-cardano/learn/eutxo-explainer">eUTXO</a></td>
+<td>ADA 支付费用、参与质押和链上治理；池奖励来自费用与储备释放，不是无来源收益。<a href="https://developers.cardano.org/docs/operate-a-stake-pool/basics/consensus-staking/">激励</a>、<a href="https://cips.cardano.org/cip/CIP-1694">治理</a></td>
+<td>适合重视显式状态和可预测执行预算的资产流程；共享状态并发与应用设计需要不同于账户模型的方法，研究路线必须转化为可用工具。</td>
+<td>官方 Leios 页记录公共测试网已运行，Linear Leios 随 Dijkstra 的晚 2026 目标仍受治理与激活条件约束。<a href="https://cardano.org/glossary/leios/">Leios</a> **判断：**形式化和治理提供长期建设能力，应用采用及升级落地比论文数量更关键。</td>
+</tr>
+<tr>
+<td><strong>NEAR — NEAR Protocol 原生币</strong>；分片 PoS 网络。</td>
+<td>Nightshade 将执行分片；Intents、Chain Signatures 等在其上协调跨链结果，不能把跨链服务等同基础共识。<a href="https://www.near.org/blockchain">协议</a>、<a href="https://www.near.org/chain-abstraction">跨链产品</a></td>
+<td>NEAR 支付执行费用、锁定存储空间并参与质押；代理付费可隐藏终端持币步骤，但不会消除底层资源费用。<a href="https://docs.near.org/protocol/transactions/gas">gas</a>、<a href="https://docs.near.org/protocol/storage/storage-staking">存储</a>、<a href="https://docs.near.org/protocol/network/validators">验证者</a></td>
+<td>适合降低跨链操作及账户使用摩擦；求解器、桥和签名服务各自带来额外假设，跨链流量不应全部算成 NEAR 直接价值。</td>
+<td>官方页面已描述 Nightshade 3.0、私有分片及 EdDSA Chain Signatures；其中扩展能力宣传不能代替生产负载测量。<a href="https://www.near.org/blockchain">当前产品页</a> **判断：**减少操作步骤有实际价值，关键是跨链安全与透明收费。</td>
+</tr>
+<tr>
+<td><strong>AVAX — Avalanche 原生币</strong>；Ava Labs 等维护基础软件。</td>
+<td>Primary Network 现用 Snowman，反复抽样投票形成可调概率安全；Avalanche L1 可有自己的执行与验证规则。<a href="https://build.avax.network/docs/nodes/architecture/consensus">共识</a></td>
+<td>AVAX 支付并销毁主网费用、支持主网质押；Etna 后新 L1 验证者缴动态 AVAX 费用，不必再质押 2,000 AVAX 或验证整个主网。<a href="https://build.avax.network/docs/primary-network/avax-token">币的角色</a>、<a href="https://build.avax.network/blog/l1-validator-fee">L1 费用</a></td>
+<td>适合需要独立规则和容量的应用链；每条 L1 的安全、流动性和 gas 币可不同，不能认为它们都继承完全相同的安全或强制消费同量 AVAX。</td>
+<td>Etna 改变了开链成本与 AVAX 需求路径；低门槛利于部署，但单链增长未必按交易量等比例传导给 AVAX。<a href="https://build.avax.network/blog/subnet-vs-l1-validators">变化</a> **判断：**应用链工具能持续有用，必须验证实际链需求和运行费用是否足以支持基础设施。</td>
+</tr>
+<tr>
+<td><strong>SUI — Sui 原生币</strong>；Mysten Labs 发起、Sui Foundation 等支持的 Move 网络。</td>
+<td>DPoS 决定投票权，Mysticeti DAG 协调共识；对象模型允许不同对象的操作并行，共享对象仍需排序。<a href="https://docs.sui.io/develop/sui-architecture/consensus">共识</a>、<a href="https://docs.sui.io/develop/write-move/sui-move-concepts">对象设计</a></td>
+<td>SUI 用于 gas、存储和质押，存储基金安排长期存储成本；有限供应仍有释放计划，网络有用不能直接推出代币升值。<a href="https://docs.sui.io/develop/sui-architecture/tokenomics-overview">经济规则</a></td>
+<td>适合对象所有权清晰的游戏资产、支付及交互应用；需要 Move 工具和相应审计能力，热点共享状态仍有资源竞争。</td>
+<td>当前文档说明 Transaction Driver、共识内验证和 SIP-39 验证者准入调整；受控 Mysticeti 测试数字明确不是生产指标。<a href="https://docs.sui.io/develop/sui-architecture/consensus">处理流程</a>、<a href="https://docs.sui.io/develop/sui-architecture/tokenomics-overview">准入</a> **判断：**对象模型有差异化，关键是可靠客户端、应用留存及分散验证。</td>
+</tr>
+<tr>
+<td><strong>POL — Polygon 原生网络币，承接 MATIC</strong>；不是把所有 Polygon 产品合成一枚股权。</td>
+<td>Polygon Chain / PoS 用 Bor 执行和 Heimdall-v2（Cosmos SDK、CometBFT）验证，再向 Ethereum 提交检查点；这不等于 Ethereum 验证每笔执行的 rollup。<a href="https://docs.polygon.technology/pos/architecture/overview">架构</a></td>
+<td>2024-09-04 起 POL 接替 PoS gas 与质押，Ethereum 上 MATIC 可按 1:1 迁移；更广 Agglayer 职能须逐项核验，不能直接视为全生态收入权。<a href="https://polygon.technology/blog/matic-to-pol-migration-is-now-live-everything-you-need-to-know">迁移</a></td>
+<td>适合沿用 EVM 的低费支付及资产应用；独立验证者、桥和不同 Polygon 产品的安全边界必须分别理解。</td>
+<td>Heimdall-v2 已在当前架构文档中成为现行共识层。<a href="https://docs.polygon.technology/pos/architecture/overview">架构</a> **判断：**支付与工具兼容性提供用途，长期价值承接仍要看实际费用、质押与已启用的跨链职能。</td>
+</tr>
+<tr>
+<td><strong>ATOM — Cosmos Hub 原生质押币</strong>；不是所有 Cosmos SDK / IBC 链的共同股份。</td>
+<td>Hub 用 PoS 与 CometBFT 系列一致性机制维护自己的账本；其他 Cosmos 链可有自己的验证者和币，IBC 是通信协议。<a href="https://legacy.cosmos.network/whitepaper/">Hub 设计</a>、<a href="https://legacy.cosmos.network/validators/">验证者</a></td>
+<td>ATOM 用于 Hub 质押、治理和 Hub 费用；使用 Cosmos SDK 或 IBC 不普遍强制购买 ATOM，生态增长与 Hub 收入之间必须有实际收费路径。</td>
+<td>适合重视主权链与跨链组合的体系；主权也意味着安全与流动性分散，不能把所有生态使用量归给 Hub。</td>
+<td>Gaia v28 已移除 ICS provider 模块；9 月官方报告记录 Hub 因 Neutron 外部攻击暂时停链并以补丁转移部分赃款，Hub 本身未被利用。<a href="https://github.com/cosmos/gaia/releases/tag/v28.0.0">版本</a>、<a href="https://forum.cosmos.network/t/neutron-governance-attack-cosmos-hub-response-and-recovery-update/17369">复盘</a> **判断：**工具标准可耐久，ATOM 的持续需求仍需 Hub 自身产品证明，也要正视紧急治理权。</td>
+</tr>
+<tr>
+<td><strong>FLOW — Flow 原生币</strong>；Dapper Labs 发起的网络，由 Flow Foundation 和生态建设。</td>
+<td>PoS 将收集、HotStuff 共识、执行和验证分工，支持 Cadence 与 EVM；分工能减少重复工作，但复杂性不会消失。<a href="https://developers.flow.com/protocol/node-ops/node-operation/node-roles">节点职责</a></td>
+<td>FLOW 用于质押、费用和存储，EVM 与 Cadence 共用 FLOW；用户可由应用代付，底层仍要付费。<a href="https://flow.com/upgrade/crescendo/evm">双环境</a>、<a href="https://www.flow.com/flow-tokenomics/technical-overview">经济规则</a></td>
+<td>适合面向消费者的资产、游戏和可编程账户；运行节点存在角色门槛，资源导向语言也不能保证运行时无漏洞。</td>
+<td>官方 2026 年复盘披露 2025 年末 Cadence 类型混淆造成伪造资产，随后修补和验证者授权恢复。<a href="https://www.flow.com/post/dec-27-technical-post-mortem">复盘</a> **判断：**体验设计有价值，耐久性取决于实现安全、透明恢复边界和实际应用留存。</td>
+</tr>
+<tr>
+<td><strong>WAVES — Waves 账本原生币</strong>；不能与该生态的其他稳定币或应用币混同。</td>
+<td>Leased PoS 允许持有人保留控制权并将余额租赁给出块节点，Waves-NG 和 Ride 支持资产与应用。<a href="https://docs.waves.tech/en/blockchain/waves-protocol/leased-proof-of-stake-lpos">共识</a>、<a href="https://docs.waves.tech/en/blockchain/waves-protocol/light-node">协议文档</a></td>
+<td>WAVES 用于费用和出块权重，出块者领取费用与区块奖励；租赁分成依节点安排，不是任何持币者自动获得的利润。<a href="https://docs.waves.tech/en/blockchain/token/waves">代币</a></td>
+<td>适合既有 Waves 资产和 Ride 应用；新项目要衡量独立工具、接入和流动性成本，不能凭旧品牌替代需求验证。</td>
+<td>现有 1.5 文档描述状态快照及挑战机制以减轻节点负担，本次未把文档版本擅自换算成最新主网激活日期。<a href="https://docs.waves.tech/en/blockchain/waves-protocol/light-node">1.5</a> **判断：**小生态也可服务稳定需求，但持续维护和可验证节点成本比概念扩张更关键。</td>
+</tr>
+<tr>
+<td><strong>HIVE — Hive 原生币</strong>；2020 年从 Steem 分出的社区网络，HBD 是另一种资产。</td>
+<td>DPoS 见证人出块，支持内容、投票和资产操作；Hive Power 是锁定的 HIVE，交易消耗可恢复的 Resource Credits。<a href="https://hive.io/whitepaper.pdf">白皮书</a></td>
+<td>HIVE / HP 决定治理及资源能力，RC 五天恢复；“零交易费”是用持仓或委托提供资源额度，不是网络没有成本。<a href="https://developers.hive.io/tutorials-recipes/calculate_rc_recipe.html">RC</a></td>
+<td>适合重复社交、内容和游戏操作；资源预配置降低每次付款摩擦，代价是持仓占用及权益加权治理，内容奖励也不是注意力真实性证明。</td>
+<td>官方代码持续维护权限、RC、防洪及节点数据管理，HAF 提供应用数据接口。<a href="https://github.com/openhive-network/hive/releases">发布</a>、<a href="https://github.com/openhive-network/haf">HAF</a> **判断：**社区和资源配额机制具有实用性，须观察独立开发、用户留存及奖励的抗操纵能力。</td>
+</tr>
+<tr>
+<td><strong>MANTRA — MANTRA Chain 现行原生币，旧符号 OM</strong>；不要把旧 EVM OM 当成相同可用资产。</td>
+<td>Cosmos SDK / CometBFT PoS 底层加 EVM 执行，聚焦真实资产代币化；开放链可以承载带许可的应用。<a href="https://docs.mantrachain.io/developers/architecture/overview">架构</a></td>
+<td>原生币用于费用、质押和治理，购买它不等于拥有平台上的房地产或国债；资产权利来自各发行产品的合同及托管安排。</td>
+<td>适合需要许可规则和合规接入的资产应用；链上流转不能自动解决链下权属、执行、托管或赎回。</td>
+<td>官方确认 2026-03-02 区块 13,000,000 完成 <strong>1 OM → 4 MANTRA</strong>，旧 ERC-20 OM 迁移窗口已于 1 月 15 日结束，单位拆分不是财富增加。<a href="https://docs.mantrachain.io/mantra-token-background">身份和迁移</a> **判断：**耐久性须由真正发行、使用及可执行权利证明，而不是 RWA 名称。</td>
+</tr>
+</tbody></table>
+<h2>扩容治理代币与稳定计价</h2>
+<table>
+<thead>
+<tr>
+<th>资产与项目身份</th>
+<th>账本如何工作、核心任务</th>
+<th>代币为何必需，价值流向哪里</th>
+<th>较合适的用途与主要代价</th>
+<th>已核验变化；耐久性判断</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ARB — ArbitrumDAO 治理代币</strong>；Arbitrum One 的 ERC-20，不是独立 PoS 链的质押币。<a href="https://docs.arbitrum.foundation/dao-glossary">身份</a></td>
+<td>Arbitrum One 是 optimistic rollup，排序执行后向 Ethereum 提交数据，以 BoLD 挑战错误结果；Nova 的 AnyTrust 有不同数据可用性假设。<a href="https://docs.arbitrum.io/get-started/arbitrum-introduction">架构</a></td>
+<td>ARB 决定升级、国库等治理事项，One 的 gas 用 ETH；国库收到收入不等于持币者有直接分红或赎回权。<a href="https://docs.arbitrum.io/for-devs/dev-tools-and-resources/chain-info">链资料</a>、<a href="https://docs.arbitrum.foundation/state-of-progressive-decentralization">治理权限</a></td>
+<td>适合沿用 EVM、需要 Ethereum 结算的应用；排序器、挑战期、桥及紧急安全委员会仍构成额外边界。</td>
+<td>2026-09-24 官方指南已说明 <strong>PGA 替代 Timeboost</strong> 并引入 Fast Feed。<a href="https://blog.arbitrum.io/competing-for-transaction-priority-on-arbitrum/">指南</a> **判断：**扩容技术有持续用途，ARB 自身价值承接则取决于治理和实际收入分配规则，不能只看链交易量。</td>
+</tr>
+<tr>
+<td><strong>OP — Optimism Collective 治理代币，额外比较对象</strong>；与 OPG 不同。<a href="https://specs.optimism.io/governance/gov-token.html">代币规格</a></td>
+<td>OP Mainnet 在 L2 排序执行，并向 Ethereum 提交数据与可挑战状态；OP Stack 是可部署软件栈，不代表所有使用它的链条件一致。<a href="https://optimism.io/blog/what-is-op-mainnet">架构</a></td>
+<td>OP 主要承担治理，OP Mainnet 基础 gas 以 ETH 计；2026 回购安排新增间接价值承接，但不赋予现金赎回或公司分红权。<a href="https://docs.optimism.io/op-stack/transactions/fees">费用</a>、<a href="https://optimism.io/blog/op-token-buybacks">回购政策</a></td>
+<td>适合共享扩容工具与既有 EVM 应用；排序器、升级权和跨链操作仍需管理，使用开源软件也不自动意味着向 OP 持币人付款。</td>
+<td>治理公告授权用 2026 收入的 50% 回购，并公布前三次执行；不能据计划宣称全年均已执行或回购必然永久持续。<a href="https://gov.optimism.io/t/buyback-communication-thread/10588">执行记录</a> **判断：**工具栈与收入协议应分别评估，直接称“只有治理、完全无收入联系”已过时。</td>
+</tr>
+<tr>
+<td><strong>USDD — USDD 协议的多链美元目标稳定币</strong>；不是独立公链币，也不同于 USDDOLD 和收益份额 sUSDD。<a href="https://docs.usdd.io/">当前定义</a>、<a href="https://docs.usdd.io/introduction/what-is-usddold.md">旧版</a></td>
+<td>现行机制以抵押 Vault 生成债务，偿债后取回自己的抵押品；PSM 按支持币种的可用余额铸造、销毁和兑换，继承宿主链共识。<a href="https://docs.usdd.io/system-architecture/system-architecture">架构</a>、<a href="https://docs.usdd.io/user-guide/psm-peg-stability-module.md">PSM</a></td>
+<td>USDD 用于稳定目标计价、支付和偿债，底层费用由宿主链资产支付；持有 USDD 不自动等于持有收益产品，sUSDD 是单独份额。<a href="https://docs.usdd.io/system-architecture/susdd-mechanism">sUSDD</a></td>
+<td>适合确实需要美元目标计价的链上活动；抵押质量、预言机、清算、PSM 库存和管理权限构成主要代价，不是无条件美元现金兑付。</td>
+<td>当前文档已区分新版、旧版和多链合约，接入前须核对具体链与地址。<a href="https://docs.usdd.io/introduction/collateral-asset-contract-addresses.md">合约</a> **判断：**稳定计价需求持久，但某个稳定币能否持续，要看锚定机制与兑现通道在压力下是否有效。</td>
+</tr>
+</tbody></table>
+<h2>“最少摩擦、最多有用流动”应如何检验</h2>
+<p>这是产品设计的启发式，不是物理定律，更不是“速度最快的币最终一定胜出”。不同使用者会为开放参与、隐私、规则稳定、流动性或可恢复性支付不同成本。</p>
+<p>我会把一次真实任务的摩擦拆成：取得资产、保管密钥、跨链或兑换、授权、排队及最终确认、验证交付、退出及故障恢复。每一步都要计入费用、资金占用、操作次数与额外信任。某系统链上费低，但要求用户先跨三条链购币，完成同一任务的总摩擦仍可能更大；反过来，安全检查或存储费用有时是防止别人将成本转嫁给全网的必要安排。</p>
+<p>“有用流动”应测量完成且被接受的任务、实际交付、重试是否重收费、结算是否准确及非补贴下的留存；不能用刷量、机器人往返转账或价格上涨替代。判断代币价值承接还要追踪费用给谁、是否销毁、必须锁定多久、补贴从哪里来，以及用户是否可以绕开该币完成同样工作。</p>
+<p>这里已有值得学习的设计：可独立验证规则、明确执行预算、对象并行、可恢复资源额度、代付、通道和批处理，都能减少特定摩擦。它们不必互相排斥，也没有哪一种能够免除安全预算、数据保存和运营成本。</p>
+<h2>对 CINDER 的直接结论</h2>
+<p>我们的机会不能建立在“别人都做不到付款”“隐私币已经抗量子”或“传统网络不会升级”上。应证明一个更窄、更清楚的闭环：用户或代理授权明确上限，购买明确资源或内容，原子分账，失败退款，交付有可核验凭证，并能导出重放账本。</p>
+<p>原生 CINDER 可以让权限、资源预留、费用和结算由同一套规则表达；<strong>以币计价确定，不等于以美元计价稳定，更不等于计算资源价值永不变化。</strong> 可兑换的 WORK 必须有明确数量、交付能力和失败处理，AMM 必须由真实库存和资金形成，不能用凭空储备伪造流动性。</p>
+<p>ML-DSA 交易签名只覆盖其授权边界。真正的抗量子网络还必须处理共识签名、哈希安全参数、节点认证、密钥迁移、软件供应链及实际运行环境；Ethereum 的多层迁移计划恰好说明这是一项系统工程。<a href="https://blog.ethereum.org/2026/09/07/protocol-priorities">多层路线</a> 当前 CINDER 的单运营者开发网络不能被描述为已经完成独立验证者共识、审计主网或正确推理证明。</p>
+<p>这份比较没有建立“哪枚币必胜”的排名。它给出的建设标准更严格：减少完成真实任务的总摩擦，同时让费用、供给、权限、交付和失败边界都能被别人检查。</p>
+<p>补充：本报告最初保留了 OPG 身份歧义。交叉核验后，本次名单按 OpenGradient 解释，详见 <a href="/docs/coin-research-identity.html">OPG 与同名资产核验</a>。OP 仍仅作为额外对照，不等同于 OPG。</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

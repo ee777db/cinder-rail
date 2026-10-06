@@ -15,9 +15,7 @@ class DurableObject {
   ctx: any; env: any;
   constructor(ctx: any, env: any) { this.ctx = ctx; this.env = env; }
 }`);
-for (const name of ['native-crypto', 'native-core']) {
-  source = source.replace(`from './${name}'`, `from '${new URL('../src/' + name + '.ts', import.meta.url).href}'`);
-}
+source = source.replace(/from '(\.\/native-[a-z-]+)(?:\.ts)?'/g, (_, path) => `from '${new URL('../src/' + path.slice(2) + '.ts', import.meta.url).href}'`);
 const compiled = ts.transpileModule(source, {
   compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext },
 }).outputText;

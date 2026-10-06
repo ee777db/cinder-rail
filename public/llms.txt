@@ -1,12 +1,17 @@
-# Cinder Rail
+# Cinder Rail 0.2
 
-Experimental HTTP 402 compute sandbox. No real payments or token.
+Native testnet cinder-devnet-1. CINDER is self-issued with 6 decimals; it is not a dollar stablecoin or an external-chain token. WORK is a finite entitlement to a bounded SHA-384 computation, not LLM inference. Test assets have no cash value.
 
-- [Console](/)
+- [Application](/)
+- [Public ledger explorer](/explorer)
+- [Whitepaper](/protocol)
 - [Developer guide](/developers)
-- [API catalog](/api/catalog)
-- [Issuer public key](/api/key)
-- [Architecture](/docs/architecture.md)
-- [Security](/docs/security.md)
+- [Coin research in Chinese](/research)
+- [Native network parameters and operator public key](/api/native/info)
+- [Genesis](/api/native/genesis)
+- [API catalog](/openapi.json)
+- [SDK](/native-sdk.js)
+- [Security](/security)
+- [Privacy](/privacy)
 
-Protocol is cinder-sandbox-v1, not x402 wire compatible. Denomination sandbox-microUSD is nonredeemable test accounting. Agent keys ECDSA P-256; provider receipt signatures certify provenance, not inference correctness.
+ML-DSA-65 authorization, SHA-384 commitments, integer double-entry accounting, bounded compute channels, signed music uploads and paid access, CINDER/WORK spot AMM. Single operator checkpoints are not independent-validator finality. Signatures prove authorization/provenance, not correctness of LLM inference. No claim of end-to-end post-quantum hosting or cryptographic audit. Legacy P-256 HTTP402 sandbox remains under /compute and /api/sessions; it is separate and not x402 wire compatible.

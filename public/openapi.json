@@ -1,79 +1,125 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Cinder Rail sandbox API",
-    "version": "0.1.0",
-    "description": "Custom HTTP 402 sandbox. No real payments. Not x402 wire-compatible. ECDSA P-256 signatures use SHA-256, raw r||s, base64url without padding, recursively sorted JSON object keys. Session IDs are public receipt identifiers. A separate private sessionToken returned on creation must be sent as X-Cinder-Session for quote creation and ledger reads. Never export this token."
+    "title": "Cinder native testnet API",
+    "version": "0.2.0",
+    "description": "Own CINDER asset and finite WORK entitlement. No cash value, USD peg, independent consensus or proof of correct LLM inference. Signatures ML-DSA-65; hashes SHA-384; UTF-8 canonical JSON sorts object keys and rejects unsafe integers. Full strict action schemas and SDK examples are in /developers. The prior P-256 sandbox is separately documented at /openapi-legacy.json."
   },
   "servers": [
     {
       "url": "/"
     }
   ],
+  "externalDocs": {
+    "url": "https://cinder-rail.ee777db.workers.dev/developers"
+  },
   "paths": {
-    "/api/health": {
+    "/api/native/info": {
       "get": {
-        "summary": "Service status",
+        "summary": "Network, finite supply, prices, quotas and operator key",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
           },
           "429": {
-            "description": "Sandbox daily quota exceeded"
+            "description": "Testnet quota or finite capacity exhausted"
           }
         }
       }
     },
-    "/api/catalog": {
+    "/api/native/genesis": {
       "get": {
-        "summary": "Services and test prices",
+        "summary": "Signed genesis",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
           },
           "429": {
-            "description": "Sandbox daily quota exceeded"
+            "description": "Testnet quota or finite capacity exhausted"
           }
         }
       }
     },
-    "/api/key": {
+    "/api/native/economy": {
       "get": {
-        "summary": "Issuer public JWK; pin independently",
+        "summary": "Finite WORK inventory and native CINDER/WORK pool",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
           },
           "429": {
-            "description": "Sandbox daily quota exceeded"
+            "description": "Testnet quota or finite capacity exhausted"
           }
         }
       }
     },
-    "/api/sessions": {
+    "/api/native/music/catalog": {
+      "get": {
+        "summary": "Published music and immutable royalty splits",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        }
+      }
+    },
+    "/api/native/accounts": {
       "post": {
-        "summary": "Create a 24-hour sandbox session",
+        "summary": "Register an ML-DSA-65 account with proof of key possession",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
           },
           "429": {
-            "description": "Sandbox daily quota exceeded"
-          },
-          "201": {
-            "description": "Created: sessionId, balanceMicros, expiresAt, unit"
+            "description": "Testnet quota or finite capacity exhausted"
           }
         },
         "requestBody": {
@@ -81,76 +127,66 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "publicKey": {
-                    "type": "object",
-                    "description": "Public P-256 JWK without d"
-                  }
-                },
-                "required": [
-                  "publicKey"
-                ]
+                "$ref": "#/components/schemas/AccountRegistration"
               }
             }
           }
         }
       }
     },
-    "/api/sessions/{sessionId}": {
+    "/api/native/accounts/{address}": {
       "get": {
-        "summary": "Read ledger and up to 50 receipts",
+        "summary": "Public native account balance and next-nonce basis",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
           },
           "429": {
-            "description": "Sandbox daily quota exceeded"
+            "description": "Testnet quota or finite capacity exhausted"
           }
         },
         "parameters": [
           {
+            "name": "address",
             "in": "path",
-            "name": "sessionId",
             "required": true,
             "schema": {
-              "type": "string",
-              "pattern": "^[a-f0-9]{64}$"
+              "$ref": "#/components/schemas/Address"
             }
           }
         ]
       }
     },
-    "/api/execute": {
+    "/api/native/submit": {
       "post": {
-        "summary": "Quote or execute a signed request",
+        "summary": "Atomically commit a signed native transaction; exact retry is idempotent",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success; native responses are no-store JSON except media."
           },
           "400": {
-            "description": "Invalid request"
-          },
-          "429": {
-            "description": "Sandbox daily quota exceeded"
-          },
-          "402": {
-            "description": "Unsigned call: quote and exact signingPayload. Insufficient balance: error without quote."
+            "description": "Strict schema or input rejected"
           },
           "401": {
-            "description": "Signature invalid"
+            "description": "Authorization failed"
           },
           "409": {
-            "description": "Stale, failed or in-progress quote"
+            "description": "Conflicting nonce, sequence or immutable data"
           },
-          "410": {
-            "description": "Quote expired"
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
           },
-          "503": {
-            "description": "Compute failed; reservation refunded"
+          "202": {
+            "description": "Compute funds reserved; poll job. A 202 response includes the signed reservation receipt."
           }
         },
         "requestBody": {
@@ -158,36 +194,1193 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "sessionId": {
-                    "type": "string"
-                  },
-                  "service": {
-                    "type": "string",
-                    "enum": [
-                      "hash",
-                      "inference"
-                    ]
-                  },
-                  "input": {
-                    "type": "string",
-                    "maxLength": 4000
-                  },
-                  "quoteId": {
-                    "type": "string"
-                  },
-                  "signature": {
-                    "type": "string",
-                    "description": "Base64url raw ECDSA P256 signature over the exact signingPayload from the stored quote"
-                  }
-                },
-                "required": [
-                  "sessionId",
-                  "input"
-                ]
+                "$ref": "#/components/schemas/Submit"
               }
             }
+          }
+        }
+      }
+    },
+    "/api/native/transactions/{hash}": {
+      "get": {
+        "summary": "Signed native receipt",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/jobs/{hash}": {
+      "get": {
+        "summary": "Compute result or principal refund",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/music/tracks/{id}": {
+      "get": {
+        "summary": "Immutable music terms and current availability",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/channels/{id}": {
+      "get": {
+        "summary": "Prefunded session state",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/export": {
+      "get": {
+        "summary": "Full receipts and account keys, 20 checkpoints per page",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/blocks": {
+      "get": {
+        "summary": "Hash-linked signed headers, 20 checkpoints per page",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/channels/{id}/journal": {
+      "get": {
+        "summary": "Session-signed call evidence, 20 entries per page",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ]
+      }
+    },
+    "/api/native/channels/call": {
+      "post": {
+        "summary": "Consume one authorized call inside previously reserved collateral; no global checkpoint yet",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelCall"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native/media/upload": {
+      "post": {
+        "summary": "Owner-signed immutable 24KiB audio chunks; maximum complete file 4MiB",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MediaUpload"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native/music/access": {
+      "post": {
+        "summary": "Obtain private one-hour playback token with fresh private proof of the payer key",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MusicAccess"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/native/media/{hash}": {
+      "get": {
+        "summary": "Serve paid audio with byte-range support; token is private",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "head": {
+        "summary": "Serve paid audio with byte-range support; token is private",
+        "responses": {
+          "200": {
+            "description": "Success; native responses are no-store JSON except media."
+          },
+          "400": {
+            "description": "Strict schema or input rejected"
+          },
+          "401": {
+            "description": "Authorization failed"
+          },
+          "409": {
+            "description": "Conflicting nonce, sequence or immutable data"
+          },
+          "429": {
+            "description": "Testnet quota or finite capacity exhausted"
+          }
+        },
+        "parameters": [
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Digest"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Atoms": {
+        "type": "string",
+        "pattern": "^(0|[1-9][0-9]*)$",
+        "description": "Integer atoms: 1 CINDER = 1000000 atoms. No dollar price."
+      },
+      "Address": {
+        "type": "string",
+        "pattern": "^cin1[a-f0-9]{96}$"
+      },
+      "Digest": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{96}$"
+      },
+      "Signature": {
+        "type": "string",
+        "description": "Canonical unpadded base64url ML-DSA-65 signature of canonical UTF-8 JSON."
+      },
+      "Transaction": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "domain",
+          "chainId",
+          "sender",
+          "nonce",
+          "validUntil",
+          "maxDebitAtoms",
+          "actions"
+        ],
+        "properties": {
+          "domain": {
+            "const": "cinder.transaction.v1"
+          },
+          "chainId": {
+            "const": "cinder-devnet-1"
+          },
+          "sender": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "nonce": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Exactly current account nonce + 1."
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Canonical ISO timestamp, strictly future and no more than five minutes away."
+          },
+          "maxDebitAtoms": {
+            "$ref": "#/components/schemas/Atoms"
+          },
+          "actions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "items": {
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/Faucet"
+                },
+                {
+                  "$ref": "#/components/schemas/Transfer"
+                },
+                {
+                  "$ref": "#/components/schemas/Split"
+                },
+                {
+                  "$ref": "#/components/schemas/Compute"
+                },
+                {
+                  "$ref": "#/components/schemas/MusicPublish"
+                },
+                {
+                  "$ref": "#/components/schemas/MusicListen"
+                },
+                {
+                  "$ref": "#/components/schemas/MusicUnpublish"
+                },
+                {
+                  "$ref": "#/components/schemas/WorkBuy"
+                },
+                {
+                  "$ref": "#/components/schemas/WorkTransfer"
+                },
+                {
+                  "$ref": "#/components/schemas/WorkRedeem"
+                },
+                {
+                  "$ref": "#/components/schemas/AddLiquidity"
+                },
+                {
+                  "$ref": "#/components/schemas/RemoveLiquidity"
+                },
+                {
+                  "$ref": "#/components/schemas/Swap"
+                },
+                {
+                  "$ref": "#/components/schemas/ChannelOpen"
+                },
+                {
+                  "$ref": "#/components/schemas/ChannelClose"
+                }
+              ]
+            },
+            "description": "Strict per-action fields are documented in /developers. Music/economy/channel transactions contain exactly one action; base transfers/splits allow batches."
+          }
+        }
+      },
+      "Submit": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "transaction",
+          "signature"
+        ],
+        "properties": {
+          "transaction": {
+            "$ref": "#/components/schemas/Transaction"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          },
+          "computeInput": {
+            "type": "string",
+            "description": "Raw input matching the signed SHA-384 inputHash; only compute and economy.redeem."
+          }
+        }
+      },
+      "AccountRegistration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "publicKey",
+          "proof"
+        ],
+        "properties": {
+          "publicKey": {
+            "type": "string",
+            "description": "Unpadded base64url ML-DSA-65 public key, 1952 raw bytes."
+          },
+          "proof": {
+            "$ref": "#/components/schemas/Signature"
+          }
+        },
+        "description": "Sign {domain: cinder.account.v1, chainId: cinder-devnet-1, publicKey}."
+      },
+      "SignedAuthorization": {
+        "type": "object",
+        "required": [
+          "authorization",
+          "signature"
+        ],
+        "properties": {
+          "authorization": {
+            "type": "object"
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          }
+        },
+        "description": "Domain-separated strict fields differ by endpoint; use the SDK and linked developer guide."
+      },
+      "ChannelCall": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "message",
+          "signature",
+          "input"
+        ],
+        "properties": {
+          "message": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "domain",
+              "chainId",
+              "channelId",
+              "sequence",
+              "inputHash"
+            ],
+            "properties": {
+              "domain": {
+                "const": "cinder.channel-call.v1"
+              },
+              "chainId": {
+                "const": "cinder-devnet-1"
+              },
+              "channelId": {
+                "$ref": "#/components/schemas/Digest"
+              },
+              "sequence": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10000
+              },
+              "inputHash": {
+                "$ref": "#/components/schemas/Digest"
+              }
+            }
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          },
+          "input": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          }
+        }
+      },
+      "Faucet": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "const": "faucet"
+          }
+        }
+      },
+      "Transfer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "to",
+          "amountAtoms"
+        ],
+        "properties": {
+          "type": {
+            "const": "transfer"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "amountAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      },
+      "Split": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "app",
+          "amountAtoms",
+          "recipients",
+          "referenceHash",
+          "units"
+        ],
+        "properties": {
+          "type": {
+            "const": "split"
+          },
+          "app": {
+            "enum": [
+              "music",
+              "agent",
+              "trade"
+            ]
+          },
+          "amountAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "recipients": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "address",
+                "bps"
+              ],
+              "properties": {
+                "address": {
+                  "$ref": "#/components/schemas/Address"
+                },
+                "bps": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                }
+              }
+            },
+            "description": "Unique registered recipients; integer basis points must sum to 10000."
+          },
+          "referenceHash": {
+            "$ref": "#/components/schemas/Digest"
+          },
+          "units": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000000
+          }
+        }
+      },
+      "Compute": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "service",
+          "inputHash"
+        ],
+        "properties": {
+          "type": {
+            "const": "compute"
+          },
+          "service": {
+            "enum": [
+              "hash",
+              "inference"
+            ]
+          },
+          "inputHash": {
+            "$ref": "#/components/schemas/Digest"
+          }
+        }
+      },
+      "MusicPublish": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "audioHash",
+          "title",
+          "artist",
+          "mime",
+          "bytes",
+          "recipients",
+          "priceAtoms",
+          "rightsDeclared"
+        ],
+        "properties": {
+          "type": {
+            "const": "music.publish"
+          },
+          "audioHash": {
+            "$ref": "#/components/schemas/Digest"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "artist": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "mime": {
+            "enum": [
+              "audio/mpeg",
+              "audio/wav",
+              "audio/ogg"
+            ]
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 12,
+            "maximum": 4194304
+          },
+          "recipients": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "address",
+                "bps"
+              ],
+              "properties": {
+                "address": {
+                  "$ref": "#/components/schemas/Address"
+                },
+                "bps": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                }
+              }
+            },
+            "description": "Unique registered recipients; integer basis points must sum to 10000."
+          },
+          "priceAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "rightsDeclared": {
+            "const": true
+          }
+        }
+      },
+      "MusicListen": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "trackId",
+          "listenId"
+        ],
+        "properties": {
+          "type": {
+            "const": "music.listen"
+          },
+          "trackId": {
+            "$ref": "#/components/schemas/Digest"
+          },
+          "listenId": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{32}$"
+          }
+        }
+      },
+      "MusicUnpublish": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "trackId"
+        ],
+        "properties": {
+          "type": {
+            "const": "music.unpublish"
+          },
+          "trackId": {
+            "$ref": "#/components/schemas/Digest"
+          }
+        }
+      },
+      "WorkBuy": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "workUnits",
+          "maxCinderAtoms"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.buy"
+          },
+          "workUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "maxCinderAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      },
+      "WorkTransfer": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "to",
+          "workUnits"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.transfer"
+          },
+          "to": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "workUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          }
+        }
+      },
+      "WorkRedeem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "inputHash"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.redeem"
+          },
+          "inputHash": {
+            "$ref": "#/components/schemas/Digest"
+          }
+        }
+      },
+      "AddLiquidity": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "maxCinderAtoms",
+          "maxWorkUnits",
+          "minLpUnits",
+          "deadline"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.addLiquidity"
+          },
+          "maxCinderAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "maxWorkUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "minLpUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RemoveLiquidity": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "lpUnits",
+          "minCinderAtoms",
+          "minWorkUnits",
+          "deadline"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.removeLiquidity"
+          },
+          "lpUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "minCinderAtoms": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "minWorkUnits": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Swap": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "assetIn",
+          "amountIn",
+          "minOut",
+          "deadline"
+        ],
+        "properties": {
+          "type": {
+            "const": "economy.swap"
+          },
+          "assetIn": {
+            "enum": [
+              "CINDER",
+              "WORK"
+            ]
+          },
+          "amountIn": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "minOut": {
+            "type": "string",
+            "pattern": "^[1-9][0-9]*$"
+          },
+          "deadline": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChannelOpen": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "sessionPublicKey",
+          "capacity",
+          "expiresAt",
+          "service"
+        ],
+        "properties": {
+          "type": {
+            "const": "channel.open"
+          },
+          "sessionPublicKey": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "service": {
+            "const": "hash"
+          }
+        }
+      },
+      "ChannelClose": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "channelId"
+        ],
+        "properties": {
+          "type": {
+            "const": "channel.close"
+          },
+          "channelId": {
+            "$ref": "#/components/schemas/Digest"
+          }
+        }
+      },
+      "MediaUpload": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authorization",
+          "signature",
+          "data"
+        ],
+        "properties": {
+          "authorization": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "domain",
+              "chainId",
+              "owner",
+              "uploadId",
+              "audioHash",
+              "mime",
+              "bytes",
+              "chunks",
+              "index",
+              "chunkHash",
+              "validUntil"
+            ],
+            "properties": {
+              "domain": {
+                "const": "cinder.media-chunk.v1"
+              },
+              "chainId": {
+                "const": "cinder-devnet-1"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/Address"
+              },
+              "uploadId": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
+              "audioHash": {
+                "$ref": "#/components/schemas/Digest"
+              },
+              "mime": {
+                "enum": [
+                  "audio/mpeg",
+                  "audio/wav",
+                  "audio/ogg"
+                ]
+              },
+              "bytes": {
+                "type": "integer",
+                "minimum": 12,
+                "maximum": 4194304
+              },
+              "chunks": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 171
+              },
+              "index": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 170
+              },
+              "chunkHash": {
+                "$ref": "#/components/schemas/Digest"
+              },
+              "validUntil": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
+          },
+          "data": {
+            "type": "string",
+            "description": "Unpadded base64url of exactly 24576 raw bytes, except the final chunk."
+          }
+        }
+      },
+      "MusicAccess": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "authorization",
+          "signature"
+        ],
+        "properties": {
+          "authorization": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "domain",
+              "chainId",
+              "owner",
+              "transactionHash",
+              "nonce",
+              "validUntil"
+            ],
+            "properties": {
+              "domain": {
+                "const": "cinder.music.playback.v1"
+              },
+              "chainId": {
+                "const": "cinder-devnet-1"
+              },
+              "owner": {
+                "$ref": "#/components/schemas/Address"
+              },
+              "transactionHash": {
+                "$ref": "#/components/schemas/Digest"
+              },
+              "nonce": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{32}$"
+              },
+              "validUntil": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "signature": {
+            "$ref": "#/components/schemas/Signature"
           }
         }
       }

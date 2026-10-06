@@ -1,0 +1,58 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CINDER 0.2 — native testnet release notes — Cinder Rail</title><meta name="description" content="Cinder Rail: Native testnet for machine budgets, creator payments and resource exchange."><link rel="icon" href="/icon.svg"><link rel="stylesheet" href="/docs.css"></head><body><header><a href="/">◈ CINDER RAIL</a><nav><a href="/">Console</a><a href="/protocol">Protocol</a><a href="/developers">Developers</a><a href="/explorer">Explorer</a><a href="/research">Research</a></nav></header><main><h1>CINDER 0.2 — native testnet release notes</h1>
+<p>5 October 2026 · deployed native testnet</p>
+<p><a href="https://cinder-rail.ee777db.workers.dev">CINDER is live</a>: create a wallet, send native test CINDER, pay for original music access, inspect creator allocations, redeem WORK or exchange the native CINDER/WORK pair. Agents can use separate session signing keys and prefunded channels. The <a href="https://cinder-rail.ee777db.workers.dev/explorer">explorer</a> lets anyone inspect actual transactions and verify their receipt signatures locally.</p>
+<p>The network is operated by one host and uses test assets. Independent validator consensus, cash redemption, a dollar peg and proof of correct LLM inference are not deployed. These notes describe a verified running testnet, not a claim that the full currency, music ecosystem or trading platform is complete.</p>
+<h2>What changed</h2>
+<ul>
+<li>Self-issued native CINDER balances, a finite reserve faucet, ML-DSA-65 authorizations, integer fees and publicly replayable signed checkpoints replace the former credit-only front page.</li>
+<li>Prefunded channels separate wallet authority from a bounded service allowance, with authenticated retries, signed call journals, consumed-payment settlement and unused-principal refunds.</li>
+<li>Music now follows an actual upload → publication → payment → playback flow, with file-hash commitments, immutable creator splits and exact public allocations.</li>
+<li>Native WORK units can be bought, transferred and redeemed for a specified deterministic operation. A funded CINDER/WORK spot pool supports shares, deposits, swaps and withdrawals.</li>
+<li>Browser wallets support local encrypted backups. The native SDK, public receipt explorer and semantic replay tools expose the same underlying accounting.</li>
+<li>One real, bounded Meta Llama request through Cloudflare Workers AI has completed with native reservation and settlement. Its signed response establishes attribution and delivery, not execution correctness.</li>
+<li><a href="https://cinder-rail.ee777db.workers.dev/research">Chinese research</a> analyzes the 48 requested ticker identities, with primary sources and explicit ambiguity where a symbol alone is insufficient.</li>
+</ul>
+<h2>Try a complete public flow</h2>
+<p>The catalog contains <strong>First Light · Cinder demo</strong>, an original 12-second synthesized recording. Its price is 0.001 test CINDER per access window, with 70/20/10 recipient shares. The recipients are demo-operated accounts. The browser has successfully purchased access and received playable audio from the deployed service. This is transparent test content, not a claim of outside artists or a real audience.</p>
+<p>The initial spot pool holds liquidity deposited as <strong>2 test CINDER and 20,000 WORK</strong> bought from actual faucet-funded balances. The pool uses actual inventory and LP ownership; its reserves may change through later trades. It does not support a fiat price or promise a financial return. The <a href="/examples/native-demo.json">demo manifest</a> publishes the content hash, recipient addresses and funding transaction identifiers without private keys.</p>
+<h2>Verification and measured performance</h2>
+<p>The complete automated suite passes <strong>192/192 tests</strong>. Main-project and browser/SDK type checks pass. Public native smoke completed 11 stages across 102 HTTP requests and eight new checkpoints, including the live Llama call. The <a href="/examples/native-apps-public.json">application report</a> records ten stages and eleven transactions covering audio ranges, precise 71/30 payouts from a 101-atom purchase, duplicate rejection, funded liquidity, slippage protection, WORK redemption and withdrawal.</p>
+<table>
+<thead>
+<tr>
+<th>Environment</th>
+<th align="right">Accepted calls</th>
+<th align="right">Total elapsed</th>
+<th align="right">Calls/second</th>
+<th align="right">Median</th>
+<th align="right">p95</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><a href="/examples/native-channel-local.json">Localhost</a></td>
+<td align="right">10,000</td>
+<td align="right">169.244 s</td>
+<td align="right">59.09</td>
+<td align="right">14.87 ms</td>
+<td align="right">30.19 ms</td>
+</tr>
+<tr>
+<td><a href="/examples/native-channel-public.json">Public endpoint, sequential client</a></td>
+<td align="right">100</td>
+<td align="right">38.819 s</td>
+<td align="right">2.58</td>
+<td align="right">353.3 ms</td>
+<td align="right">519.7 ms</td>
+</tr>
+</tbody></table>
+<p>Each measured channel used two global checkpoints and 24 total network-fee atoms, plus 100 resource atoms per accepted call. Both reports include signing and verification at the client. Intermediate calls receive collateral-backed operator acknowledgments; native settlement happens at close. Local timing is not public-network timing, and neither result establishes dollar sub-cent cost, decentralized finality or a production throughput ceiling. The public sequential measurement does not establish the requested 10,000 calls/hour workload.</p>
+<p>The <a href="/examples/native-network.json">public network identity</a>, <a href="/examples/native-live-inference.json">live inference record</a>, <a href="/examples/native-audit-public.json">public ledger replay</a> and <a href="/examples/native-audit-local.json">local replay</a> provide dated evidence. Audit counts and observed heads are in those files because the network continues to change. The additional <a href="/examples/native-throughput-public.json">four-channel public benchmark</a> completed and settled 1,000 calls in a 511.553-second call window: <strong>1.954832 calls/second</strong>, median 1,506.197 ms and p95 3,913.196 ms, plus 10.282 seconds of setup and cleanup. It used 96 network-fee atoms and 100,000 resource atoms. One exact retry was handled without duplicate charging. This route includes the client&#39;s HTTPS proxy and did not meet 10,000 calls/hour; it is recorded as measured, not replaced with the faster localhost result. <a href="/docs/completion-gate.html">The completion report</a> maps the broader requested capabilities to verified behavior and remaining gaps.</p>
+<h2>Announcement</h2>
+<blockquote>
+<p>CINDER&#39;s native testnet is live. Create a wallet, send native test CINDER, publish original audio with recipient splits, redeem a WORK unit or try a CINDER/WORK spot trade. Agents can use scoped signing keys and prefunded channels; the public explorer checks receipts and exposes the actual accounting. Native signatures use ML-DSA-65. The testnet currently has one operator and test assets: no dollar peg, independent-validator finality or proof of correct LLM inference is claimed. The website publishes developer examples, sourced Chinese research and measured verification reports.</p>
+</blockquote>
+<h2>Who it serves, and what remains</h2>
+<p>Agent developers can integrate bounded spending, scoped keys and receipts. Independent creators can inspect explicit paid-access allocations. Application builders can examine one native accounting path for access, resource consumption and spot exchange. Testnet demonstrations do not establish that agents already prefer CINDER or that it replaces Spotify, YouTube, Hyperliquid or established settlement networks.</p>
+<p>The website, explorer, developer guide, research and machine-readable API description are available public discovery surfaces. These notes can also be used for a versioned source release; a GitHub tag or external social publication is a separate action and is not implied by the existence of this page.</p>
+<p>No exchange listing, partner endorsement, independent artist adoption, organic liquidity, independent audit or promised token value is claimed. Independent network operation, robust key recovery, independently reviewed cryptography and implementation, useful reserved compute capacity, economic sustainability, execution proofs, application rights handling and a real derivatives engine remain substantive work. The testnet makes the implemented behavior inspectable without calling those missing properties complete.</p>
+</main><footer>CINDER native testnet · 单运营方开发网络 · 测试资产无现金价值 · <a href="/privacy">Privacy</a></footer></body></html>

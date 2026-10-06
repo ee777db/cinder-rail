@@ -41,7 +41,7 @@ function secure(response: Response, request: Request) {
   headers.set('Referrer-Policy','strict-origin-when-cross-origin');
   headers.set('X-Frame-Options','DENY');
   headers.set('Permissions-Policy','camera=(), microphone=(), geolocation=()');
-  headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  headers.set('Content-Security-Policy',"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
   headers.set('Strict-Transport-Security','max-age=31536000; includeSubDomains');
   if(new URL(request.url).pathname.startsWith('/api/')) headers.set('Cache-Control','no-store');
   return new Response(response.body,{status:response.status,headers});
@@ -61,7 +61,7 @@ async function route(request: Request,env: Env): Promise<Response> {
     const origin=request.headers.get('origin');
     if(origin && origin!==url.origin) return fail(403,'origin_rejected','Requests from another website are not accepted.');
   }
-  if(path==='/api/health' && request.method==='GET') return json({status:'ok',name:'Cinder Rail',version:'0.1.0',mode:'sandbox',settlement:'nonredeemable-test-ledger',verification:'signed-receipt',inferenceEnabled:env.INFERENCE_ENABLED==='true',chainDeployed:false});
+  if(path==='/api/health' && request.method==='GET') return json({status:'ok',name:'Cinder Rail',version:'0.2.0',mode:'native-testnet',settlement:'cinder-devnet-1',verification:'ML-DSA-65-checkpoints',inferenceEnabled:env.INFERENCE_ENABLED==='true',chainDeployed:true});
   if(path==='/api/catalog' && request.method==='GET') return json({services:SERVICES.map(x=>({...x,available:x.id!=='inference'||env.INFERENCE_ENABLED==='true'})),unit:UNIT,initialBalanceMicros:10000,notice:'Test credits have no monetary value. Signed receipts prove issuer provenance, not inference correctness.'});
   if(path==='/api/key' && request.method==='GET') return control(env,'/key');
   const ip=request.headers.get('CF-Connecting-IP') || 'local-development';
@@ -86,7 +86,7 @@ async function route(request: Request,env: Env): Promise<Response> {
   }
   if(path.startsWith('/api/')) return fail(404,'not_found','Unknown API route or method.');
   if(!['GET','HEAD'].includes(request.method)) return fail(405,'method_not_allowed','Use GET to read this page.');
-  const pages: Record<string,string>={'/':'/native.html','/native':'/native.html','/compute':'/index.html','/protocol':'/native.html','/developers':'/index.html','/launch':'/index.html','/security':'/security.html','/privacy':'/privacy.html'};
+  const pages: Record<string,string>={'/':'/native.html','/native':'/native.html','/explorer':'/explorer.html','/compute':'/index.html','/protocol':'/docs/whitepaper.html','/developers':'/docs/developers-native.html','/research':'/docs/coin-era-zh.html','/launch':'/docs/launch-v0.2.html','/security':'/security.html','/privacy':'/privacy.html'};
   if(pages[path]) url.pathname=pages[path];
   return env.ASSETS.fetch(new Request(url.toString(),request));
 }
